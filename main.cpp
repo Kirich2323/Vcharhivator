@@ -3,6 +3,7 @@
 #include <cstdlib>
 
 using namespace std;
+
 FILE* target;
 
 bool chek_exist(char path[])
@@ -17,24 +18,25 @@ bool chek_exist(char path[])
 
 int main(int argc, char* argv[])
 {
-    if (argc != 3)
+    if (argc < 3)
     {
         cout << "Wrong amount of arguments" << endl;
         return 0;
     }
+    cout << "sss\n";
 
-    if (*argv[1] = 'x')
+    if (*argv[1] == 'x')
     {
         if (chek_exist(argv[2]))
         {
-            cout << "Extracting";
+            cout << "Extracting\n";
         }
     }
     else if (*argv[1] == 'a')
     {
         if (chek_exist(argv[2]))
         {
-            cout << "Archiving";
+            cout << "Archiving\n";
         }
     }
     return 0;
