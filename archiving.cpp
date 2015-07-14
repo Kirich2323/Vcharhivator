@@ -26,7 +26,7 @@ bitset <8> str;
 
 typedef struct new_symb{
     char c;
-    int l;
+    char l;
 }new_symb;
 
 new_symb nm[256];
@@ -89,6 +89,7 @@ unsigned char invert(unsigned char x)
 void archive(FILE* target, char output_name[])
 {
     long filesize = getFileSize(target);
+    FILE* output = fopen(output_name, "w");
     for (int i = 0; i < filesize; i++)
     {
         unsigned char k;
@@ -123,6 +124,8 @@ void archive(FILE* target, char output_name[])
     }
 
     c_symbs(pq.top(), 0, 0);
+    for (int i = 0; i < 256; i++)
+        fprintf(output, "%c", (char)nm[i].l);
     fseek(target, 0, SEEK_SET);
     int j = 0;
     for (j = 0; j < filesize; j++)
@@ -148,6 +151,9 @@ void archive(FILE* target, char output_name[])
         char k = invert((unsigned char)buffer);
         result.push_back(k);
     }
+    fprintf(output, "%d", (int)result.size());
+    for (int i = 0; i < result.size(); i++)
+        fprintf(output, "%c", result[i]);
 
     return;
 }
