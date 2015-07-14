@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <cstdlib>
+#include "archiving.cpp"
 
 using namespace std;
 
@@ -37,6 +38,7 @@ int main(int argc, char* argv[])
         if (chek_exist(argv[2]))
         {
             cout << "Archiving\n";
+            archive(target, argv[argc - 1]);
         }
     }
     return 0;
