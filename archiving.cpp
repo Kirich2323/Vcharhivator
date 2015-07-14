@@ -86,7 +86,7 @@ unsigned char invert(unsigned char x)
     return res;
 }
 
-void archive(FILE * target)
+void archive(FILE* target, char output_name[])
 {
     long filesize = getFileSize(target);
     for (int i = 0; i < filesize; i++)
