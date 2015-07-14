@@ -6,6 +6,7 @@
 #include <vector>
 #include <bitset>
 #include <cmath>
+#include <queue>
 
 using namespace std;
 
@@ -15,7 +16,7 @@ int N = 0;
 long frequency[256];
 
 typedef struct symb{
-    int p, used = 0;
+    int p = 0;
     char n;
     struct symb* left;
     struct symb* right;
@@ -33,6 +34,12 @@ vector <unsigned char> result;
 long long buffer;
 int buf_length = 0;
 
+typedef bool (*comp)(symb*, symb*);
+bool compare(symb* x1, symb* x2)
+{
+    return (x1->p > x2->p);
+}
+
 void c_symbs(symb* e, char n, int length)
 {
     symb* t = e;
@@ -49,6 +56,10 @@ void c_symbs(symb* e, char n, int length)
         unsigned char k = (char)(pow(2, length) - 1) & (char)str.to_ulong();
         nm[e->n].c = k;
         nm[e->n].l = length;
+        int i = 0;
+        for (i = 0; i < length; i++)
+            cout << str[i];
+        cout << ' ' << e->n << ' ' << endl;
     }
 
     if (t->right)
@@ -88,61 +99,34 @@ void archive(FILE * target)
         fscanf(target, "%c", &k);
         frequency[k]++;
     }
-    symb* s[256];
+
+    priority_queue <symb*, vector<symb*>, comp> pq(compare);
     int i = 0;
-    int count = 0;
     for(i = 0; i < 256; i++)
         if (frequency[i])
         {
-            s[count] = (symb*)malloc(sizeof(symb));
-            s[count]->used = 0;
-            s[count]->p = frequency[i];
-            s[count]->n = i;
-            s[count]->left = s[count]->right = NULL;
-            count++;
+            symb* e;
+            e = (symb*)malloc(sizeof(symb));
+            e->p = frequency[i];
+            e->n = i;
+            e->left = e->right = NULL;
+            pq.push(e);
         }
-    symb* last;
-    for (;;)
+
+    while(pq.size() != 1)
     {
-        int min1 = INF;
-        int min2 = INF;
-        int min1_index = INF;
-        int min2_index = INF;
-        for(i = 0; i < count; i++)
-            if (s[i]->p <= min1 && s[i]->used != 1)
-            {
-                if (min1_index != INF)
-                    s[min1_index]->used = 0;
-                min1_index = i;
-                s[i]->used = 1;
-                min1 = s[i]->p;
-            }
-
-        for(i = 0; i < count; i++)
-            if (s[i]->p <= min2 && s[i]->used != 1)
-            {
-                if (min2_index != INF)
-                    s[min2_index]->used = 0;
-                min2_index = i;
-                s[i]->used = 1;
-                min2 = s[i]->p;
-            }
-        if (min2 == INF)
-            break;
-
+        symb* t1 = pq.top();
+        pq.pop();
+        symb* t2 = pq.top();
+        pq.pop();
         symb* e = (symb*)malloc(sizeof(symb));
-        e->left = s[min1_index];
-        e->right = s[min2_index];
-        e->p = s[min1_index]->p + s[min2_index]->p;
-        e->used = 0;
-        e->n = -1;
-        s[min1_index] = e;
-        last = e;
+        e->left = t1;
+        e->right = t2;
+        e->p = t1->p + t2->p;
+        pq.push(e);
     }
 
-    if (last)
-        c_symbs(last, 0, 0);
-
+    c_symbs(pq.top(), 0, 0);
     fseek(target, 0, SEEK_SET);
     int j = 0;
     for (j = 0; j < filesize; j++)
@@ -169,5 +153,5 @@ void archive(FILE * target)
         result.push_back(k);
     }
 
-    return ;
+    return;
 }
