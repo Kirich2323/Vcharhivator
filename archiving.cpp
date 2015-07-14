@@ -12,6 +12,8 @@ using namespace std;
 int N = 0;
 #define INF 100000000
 
+long frequency[256];
+
 typedef struct symb{
     int p, used = 0;
     char n;
@@ -54,8 +56,26 @@ void c_symbs(symb* e, char n, int length)
     return;
 }
 
-void archive(int frequency[256], char* target, int size_target)
+long getFileSize(FILE *file)
 {
+    long lCurPos, lEndPos;
+    lCurPos = ftell(file);
+    fseek(file, 0, 2);
+    lEndPos = ftell(file);
+    fseek(file, lCurPos, 0);
+    return lEndPos;
+}
+
+void archive(FILE * target)
+{
+    long filesize = getFileSize(target);
+    for (int i = 0; i < filesize; i++)
+    {
+        unsigned char k;
+        fscanf(target, "%c", &k);
+        frequency[k]++;
+    }
+    printf("ssss\n");
     symb* s[256];
     int i = 0;
     int count = 0;
@@ -66,10 +86,9 @@ void archive(int frequency[256], char* target, int size_target)
             s[count]->used = 0;
             s[count]->p = frequency[i];
             s[count]->n = i;
-            s[count]->left = s[i]->right = NULL;
+            s[count]->left = s[count]->right = NULL;
             count++;
         }
-
     symb* last;
     for (;;)
     {
@@ -77,8 +96,7 @@ void archive(int frequency[256], char* target, int size_target)
         int min2 = INF;
         int min1_index = INF;
         int min2_index = INF;
-        for(i = 0; i < N; i++)
-        {
+        for(i = 0; i < count; i++)
             if (s[i]->p <= min1 && s[i]->used != 1)
             {
                 if (min1_index != INF)
@@ -87,9 +105,8 @@ void archive(int frequency[256], char* target, int size_target)
                 s[i]->used = 1;
                 min1 = s[i]->p;
             }
-        }
 
-        for(i = 0; i < N; i++)
+        for(i = 0; i < count; i++)
             if (s[i]->p <= min2 && s[i]->used != 1)
             {
                 if (min2_index != INF)
@@ -114,10 +131,13 @@ void archive(int frequency[256], char* target, int size_target)
     if (last)
         c_symbs(last, 0, 0);
 
+    fseek(target, 0, SEEK_SET);
     int j = 0;
-    for (j = 0; j < size_target; j++)
+    for (j = 0; j < filesize; j++)
     {
-        new_symb* tmp_nm = &nm[target[j]];
+        char t;
+        fscanf(target, "%c", &t);
+        new_symb* tmp_nm = &nm[t];
         for (i = 0; i < tmp_nm->l; i++)
         {
             char buf = (char)pow(2, i);
@@ -138,6 +158,8 @@ void archive(int frequency[256], char* target, int size_target)
 
     if (buf_length > 0)
         result.push_back((char)buffer.to_ulong());
+    /*for (i = 0; i < result.size(); i++)
+        printf("%d ", (unsigned int)result[i]);*/
 
     return ;
 }
