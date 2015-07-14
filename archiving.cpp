@@ -30,7 +30,7 @@ typedef struct new_symb{
 
 new_symb nm[256];
 vector <unsigned char> result;
-bitset <16> buffer;
+long long buffer;
 int buf_length = 0;
 
 void c_symbs(symb* e, char n, int length)
@@ -46,7 +46,8 @@ void c_symbs(symb* e, char n, int length)
         c_symbs(t->left, 0, length + 1);
     else
     {
-        nm[e->n].c = (char)str.to_ulong();
+        unsigned char k = (char)(pow(2, length) - 1) & (char)str.to_ulong();
+        nm[e->n].c = k;
         nm[e->n].l = length;
     }
 
@@ -66,6 +67,18 @@ long getFileSize(FILE *file)
     return lEndPos;
 }
 
+unsigned char invert(unsigned char x)
+{
+    int base = 256;
+    unsigned char  res = 0;
+    while (x != 0)
+    {
+        res += (x & 1) * (base >>= 1);
+        x >>= 1;
+    }
+    return res;
+}
+
 void archive(FILE * target)
 {
     long filesize = getFileSize(target);
@@ -75,7 +88,6 @@ void archive(FILE * target)
         fscanf(target, "%c", &k);
         frequency[k]++;
     }
-    printf("ssss\n");
     symb* s[256];
     int i = 0;
     int count = 0;
@@ -138,28 +150,24 @@ void archive(FILE * target)
         char t;
         fscanf(target, "%c", &t);
         new_symb* tmp_nm = &nm[t];
-        for (i = 0; i < tmp_nm->l; i++)
-        {
-            char buf = (char)pow(2, i);
-            buf = buf & tmp_nm->c;
-            if (buf)
-                buffer[buf_length + i] = 1;
-            else
-                buffer[buf_length + i] = 0;
-        }
+        long long k = tmp_nm->c;
+        k <<= buf_length;
+        buffer += k;
         buf_length += tmp_nm->l;
-        if (buf_length > 8)
+        while(buf_length > 8)
         {
-            result.push_back((char)buffer.to_ulong());
+            char k = invert((unsigned char)buffer);
+            result.push_back(k);
             buffer >>= 8;
             buf_length -= 8;
         }
     }
 
     if (buf_length > 0)
-        result.push_back((char)buffer.to_ulong());
-    /*for (i = 0; i < result.size(); i++)
-        printf("%d ", (unsigned int)result[i]);*/
+    {
+        char k = invert((unsigned char)buffer);
+        result.push_back(k);
+    }
 
     return ;
 }
