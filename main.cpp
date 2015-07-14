@@ -1,48 +1,41 @@
 #include <iostream>
 #include <stdio.h>
+#include <cstdlib>
 
 using namespace std;
-typedef unsigned char BYTE;
+FILE* target;
 
-long getFileSize(FILE *file)
+bool chek_exist(char path[])
 {
-    long lCurPos, lEndPos;
-    lCurPos = ftell(file);
-    fseek(file, 0, 2);
-    lEndPos = ftell(file);
-    fseek(file, lCurPos, 0);
-    return lEndPos;
-}
-
-long frequency[256];
-
-
-int main()
-{
-    FILE* target;
-    BYTE *fileBuf;
-    if ((bool)(target = fopen("test.txt", "rb")) == 0)
+    if ((bool)(target = fopen(path, "rb")) == 0)
     {
         cout << "Some Error with open file" << endl;
+        return false;
+    }
+    return true;
+}
+
+int main(int argc, char* argv[])
+{
+    if (argc != 3)
+    {
+        cout << "Wrong amount of arguments" << endl;
         return 0;
     }
 
-    long filesize = getFileSize(target);
-    for (int i = 0; i < filesize; i++)
+    if (*argv[1] = 'x')
     {
-        unsigned char k;
-        fscanf(target, "%c", &k);
-        frequency[k]++;
+        if (chek_exist(argv[2]))
+        {
+            cout << "Extracting";
+        }
     }
-
-    for (int i = 0; i < 256; i++)
-        printf("frequency[%d] = %d\n", i, frequency[i]);
-
-    char k = 0;
-    //fscanf(target, "%c", &k);
-
-    //ifstream target ("test.txt", ios::in | ios::binary);
-    //fscanf(target, "%s", &S);
-
+    else if (*argv[1] == 'a')
+    {
+        if (chek_exist(argv[2]))
+        {
+            cout << "Archiving";
+        }
+    }
     return 0;
 }
