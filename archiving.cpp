@@ -7,6 +7,7 @@
 #include <bitset>
 #include <cmath>
 #include <queue>
+#include <algorithm>
 
 using namespace std;
 
@@ -22,14 +23,16 @@ typedef struct symb{
     struct symb* right;
 }symb;
 
-bitset <8> str;
+bitset <32> str;
 
 typedef struct new_symb{
     char c;
     char l;
+    char value;
 }new_symb;
 
 new_symb nm[256];
+new_symb* s_nm[256];
 vector <unsigned char> result;
 long long buffer;
 int buf_length = 0;
@@ -86,6 +89,37 @@ unsigned char invert(unsigned char x)
     return res;
 }
 
+bool compare_nm(new_symb i, new_symb j)
+{
+    return (i.l < j.l);
+}
+
+symb* link (symb* e, char turn)
+{
+    symb* e_link;
+    if (turn == '1')
+        {
+        if (e->right == NULL)
+        {
+            e->right = (symb*)malloc(sizeof(symb));
+            e->right->right = NULL;
+            e->right->left = NULL;
+        }
+        e_link = e->right;
+    }
+    else{
+        if (e->left == NULL)
+        {
+            e->left = (symb*)malloc(sizeof(symb));
+            e->left->right = NULL;
+            e->left->left = NULL;
+        }
+        e_link = e->left;
+    }
+
+    return e_link;
+}
+
 void archive(FILE* target, char output_name[])
 {
     long filesize = getFileSize(target);
@@ -108,6 +142,7 @@ void archive(FILE* target, char output_name[])
             e->n = i;
             e->left = e->right = NULL;
             pq.push(e);
+            nm[i].value = i;
         }
 
     while(pq.size() != 1)
@@ -124,6 +159,65 @@ void archive(FILE* target, char output_name[])
     }
 
     c_symbs(pq.top(), 0, 0);
+    stable_sort(nm, nm + 256, compare_nm);
+
+    int max_length;
+    int max_code = 0;
+    int curr_code = -1;
+
+    i = -1;
+
+    symb* tmp;
+    symb* head = (symb*)malloc(sizeof(symb));
+    head->left = NULL;
+    head->right = NULL;
+
+    while (nm[++i].l == 0);
+    max_length = nm[i].l;
+    while (i <= 255)
+    {
+
+        if (max_length == nm[i].l)
+        {
+            curr_code += 1;
+            for (int t = 0; t < max_length; t++)
+            {
+                  char k = pow(2, t);
+                  k &= curr_code;
+                  str[max_length - t - 1] = k != 0;
+            }
+        }
+        else
+        {
+            curr_code += 1;
+            curr_code <<= nm[i].l - max_length;
+            max_length = nm[i].l;
+
+            for (int t = 0; t < max_length; t++)
+            {
+                  char k = pow(2, t);
+                  k &= curr_code;
+                  str[max_length - t - 1] = k != 0;
+            }
+        }
+
+        tmp = head;
+        for (int t = 0; t < max_length; t++)
+        {
+            tmp = link(tmp, str[t]);
+            tmp->p = 0;
+        }
+        tmp->n = nm[i].value;
+        tmp->p = 1;
+
+        i++;
+    }
+
+    for (int i = 0; i < 256; i++)
+    {
+        s_nm[nm[i].value] = &nm[i];
+    }
+
     for (int i = 0; i < 256; i++)
         fprintf(output, "%c", (char)nm[i].l);
     fseek(target, 0, SEEK_SET);
@@ -132,7 +226,7 @@ void archive(FILE* target, char output_name[])
     {
         char t;
         fscanf(target, "%c", &t);
-        new_symb* tmp_nm = &nm[t];
+        new_symb* tmp_nm = s_nm[t];
         long long k = tmp_nm->c;
         k <<= buf_length;
         buffer += k;
@@ -151,6 +245,7 @@ void archive(FILE* target, char output_name[])
         char k = invert((unsigned char)buffer);
         result.push_back(k);
     }
+
     fprintf(output, "%d", (int)result.size());
     for (int i = 0; i < result.size(); i++)
         fprintf(output, "%c", result[i]);
