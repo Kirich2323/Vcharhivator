@@ -25,7 +25,7 @@ unsigned char code_length;
 }e_symbol;
 
 
-bool compare (e_symbol i, e_symbol j){
+bool cmp(e_symbol i, e_symbol j){
 if (i.code_length == j.code_length)
     return (i.value < j.value);
 return (i.code_length < j.code_length);
@@ -74,7 +74,7 @@ void decomression_extract(FILE* target, char output_path[])
         fscanf(target, "%c", &symbols[i].code_length);
     }
 
-    stable_sort(symbols, symbols + 256, compare);
+    stable_sort(symbols, symbols + 256, cmp);
 
     int max_length;
     int max_code = 0;
