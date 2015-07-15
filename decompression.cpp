@@ -33,28 +33,31 @@ return (i.code_length < j.code_length);
 
 node* link (node* e, char turn){
 node* e_link;
-if (turn == '1'){
-    if (e->right == NULL){
+if (turn == '1')
+{
+    if (e->right == NULL)
+    {
     e->right = (node*)malloc(sizeof(node));
     e->right->right = NULL;
     e->right->left = NULL;
     }
     e_link = e->right;
 }
-else{
-    if (e->left == NULL){
+else
+{
+    if (e->left == NULL)
+    {
     e->left = (node*)malloc(sizeof(node));
     e->left->right = NULL;
     e->left->left = NULL;
     }
     e_link = e->left;
 }
-
     return e_link;
 }
 
 
-int main()
+void decomression_extract()
 {
     FILE* input = fopen("arch2.upa", "rb");
     FILE* output = fopen("newoutput.txt", "w");
@@ -92,9 +95,9 @@ int main()
             curr_code += 1;
             for (t = 0; t < max_length; t++)
             {
-              char k = pow(2, t);
-              k &= curr_code;
-              code[max_length - t - 1] = k != 0;
+                  char k = pow(2, t);
+                  k &= curr_code;
+                  code[max_length - t - 1] = k != 0;
             }
         }
         else
@@ -105,19 +108,11 @@ int main()
 
             for (t = 0; t < max_length; t++)
             {
-              char k = pow(2, t);
-              k &= curr_code;
-              code[max_length - t - 1] = k != 0;
+                  char k = pow(2, t);
+                  k &= curr_code;
+                  code[max_length - t - 1] = k != 0;
             }
         }
-
-   printf("%c  ", symbols[i].value);
-   for (int v = 0; v < max_length; v++){
-        char k = pow(2, v);
-        k &= curr_code;
-        printf("%d", code[v]);
-   }
-   printf("\n");
 
     tmp = head;
     for (int t = 0; t < max_length; t++)
@@ -136,24 +131,23 @@ int main()
 
     fscanf(input, "%c", &c_length);
 
-    for (i = 0; i <= c_length; i++)
+    for (i = 0; i < c_length; i++)
     {
         fscanf(input, "%c", &buff);
         for (int m = 7; m >= 0; m--){
-            if (!(curr_node->ilist)){
+            if (!curr_node->ilist){
             char k = pow(2, m);
             k &= buff;
-            if (k == 0){
-                curr_node = curr_node->left;}
+            if (k == 0)
+                curr_node = curr_node->left;
+            else
+                curr_node = curr_node->right;
+            }
             else{
-                curr_node = curr_node->right;}
-        }
-        else{
-            fprintf(output, "%c", curr_node->value);
-            curr_node = head;
-        }
+                fprintf(output, "%c", curr_node->value);
+                curr_node = head;
+            }
         }
     }
-
-    return 0;
+    return;
 }
