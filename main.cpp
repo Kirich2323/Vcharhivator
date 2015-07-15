@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
         if (chek_exist(argv[2]))
         {
             cout << "Extracting\n";
+            decompression_extract(target, argv[argc - 1]);
         }
     }
     else if (*argv[1] == 'a')
