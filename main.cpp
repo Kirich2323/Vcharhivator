@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <cstdlib>
 #include "archiving.cpp"
+#include "decompression.cpp"
 
 using namespace std;
 
