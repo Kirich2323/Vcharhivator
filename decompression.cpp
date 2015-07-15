@@ -57,7 +57,7 @@ else
 }
 
 
-void decomression_extract(FILE* target, char output_path[])
+void decompression_extract(FILE* target, char output_path[])
 {
     FILE* output = fopen(output_path, "w");
     int i, t;
