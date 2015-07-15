@@ -127,9 +127,15 @@ void decomression_extract()
     }
 
     unsigned char buff;
-    char c_length;
+    unsigned int c_length;
 
-    fscanf(input, "%c", &c_length);
+    for (int i = 0 ; i < 4; i++)
+    {
+        unsigned char k;
+        fscanf(target, "%c", &k);
+        k *= pow(2, 8*i);
+        c_length += k;
+    }
 
     for (i = 0; i < c_length; i++)
     {
