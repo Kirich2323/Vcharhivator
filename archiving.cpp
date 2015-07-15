@@ -18,7 +18,7 @@ long frequency[256];
 
 typedef struct symb{
     int p = 0;
-    char n;
+    unsigned char n;
     struct symb* left;
     struct symb* right;
 }symb;
@@ -26,8 +26,8 @@ typedef struct symb{
 bitset <32> str;
 
 typedef struct new_symb{
-    char c;
-    char l;
+    unsigned char c;
+    unsigned char l;
     unsigned char value;
 }new_symb;
 
@@ -43,7 +43,7 @@ bool compare(symb* x1, symb* x2)
     return (x1->p > x2->p);
 }
 
-void c_symbs(symb* e, char n, int length)
+void c_symbs(symb* e, unsigned char n, int length)
 {
     symb* t = e;
     int is_print = 0;
@@ -56,7 +56,7 @@ void c_symbs(symb* e, char n, int length)
         c_symbs(t->left, 0, length + 1);
     else
     {
-        unsigned char k = (char)(pow(2, length) - 1) & (char)str.to_ulong();
+        unsigned char k = (unsigned char)(pow(2, length) - 1) & (unsigned char)str.to_ulong();
         nm[e->n].c = k;
         nm[e->n].l = length;
     }
@@ -97,7 +97,7 @@ bool compare_nm(new_symb i, new_symb j)
 void archive(FILE* target, char output_name[])
 {
     long filesize = getFileSize(target);
-    FILE* output = fopen(output_name, "w");
+    FILE* output = fopen(output_name, "wb");
     for (int i = 0; i < filesize; i++)
     {
         unsigned char k;
@@ -171,14 +171,14 @@ void archive(FILE* target, char output_name[])
     {
         s_nm[nm[i].value] = &nm[i];
     }
-
     for (int i = 0; i < 256; i++)
-        fprintf(output, "%c", (char)s_nm[i]->l);
+        fprintf(output, "%c", (unsigned char)s_nm[i]->l);
+
     fseek(target, 0, SEEK_SET);
     int j = 0;
     for (j = 0; j < filesize; j++)
     {
-        char t;
+        unsigned char t;
         fscanf(target, "%c", &t);
         new_symb* tmp_nm = s_nm[t];
         long long k = tmp_nm->c;
@@ -187,16 +187,17 @@ void archive(FILE* target, char output_name[])
         buf_length += tmp_nm->l;
         while(buf_length > 8)
         {
-            char k = invert((unsigned char)buffer);
+            unsigned char k = invert((unsigned char)buffer);
             result.push_back(k);
             buffer >>= 8;
             buf_length -= 8;
         }
     }
 
+
     if (buf_length > 0)
     {
-        char k = invert((unsigned char)buffer);
+        unsigned char k = invert((unsigned char)buffer);
         result.push_back(k);
     }
 
