@@ -10,7 +10,7 @@ using namespace std;
 
 
 typedef struct node{
-char value;
+unsigned char value;
 node* left;
 node* right;
 bool ilist;
@@ -20,8 +20,8 @@ node* head;
 node* curr_node;
 
 typedef struct encoded_symbol{
-char value;
-char code_length;
+unsigned char value;
+unsigned char code_length;
 }e_symbol;
 
 
@@ -31,7 +31,7 @@ if (i.code_length == j.code_length)
 return (i.code_length < j.code_length);
 }
 
-node* link (node* e, char turn){
+node* link (node* e, unsigned char turn){
 node* e_link;
 if (turn == '1')
 {
@@ -81,7 +81,7 @@ void decomression_extract()
     int max_code = 0;
     int curr_code = -1;
 
-    char code[32];
+    unsigned char code[32];
     i = -1;
 
     while (symbols[++i].code_length == 0);
@@ -95,7 +95,7 @@ void decomression_extract()
             curr_code += 1;
             for (t = 0; t < max_length; t++)
             {
-                  char k = pow(2, t);
+                  unsigned char k = pow(2, t);
                   k &= curr_code;
                   code[max_length - t - 1] = k != 0;
             }
@@ -108,7 +108,7 @@ void decomression_extract()
 
             for (t = 0; t < max_length; t++)
             {
-                  char k = pow(2, t);
+                  unsigned char k = pow(2, t);
                   k &= curr_code;
                   code[max_length - t - 1] = k != 0;
             }
@@ -126,7 +126,7 @@ void decomression_extract()
     i++;
     }
 
-    char buff;
+    unsigned char buff;
     char c_length;
 
     fscanf(input, "%c", &c_length);
@@ -140,7 +140,7 @@ void decomression_extract()
             fprintf(output, "%c", curr_node->value);
             curr_node = head;
         }
-            char k = pow(2, m);
+            unsigned char k = pow(2, m);
             k &= buff;
             if (k == 0)
                 curr_node = curr_node->left;
