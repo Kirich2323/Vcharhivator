@@ -157,14 +157,35 @@ void archive(FILE* target, char output_name[])
         if (max_length == nm[i].l)
         {
             curr_code += 1;
-            nm[i].c = curr_code;
+            unsigned char buff = 0;
+            for (int t = 0; t < max_length; t++)
+            {
+                unsigned char k = pow(2, t);
+                k &= curr_code;
+                if (k != 0)
+                {
+                    k = pow(2, max_length - t - 1);
+                    buff += k;
+                }
+            }
+            nm[i].c = buff;
         }
         else
         {
             curr_code += 1;
             curr_code <<= nm[i].l - max_length;
-            nm[i].c = curr_code;
             max_length = nm[i].l;
+            unsigned char buff = 0;
+            for (int t = 0; t < max_length; t++)
+            {
+                unsigned char k = pow(2, t);
+                k &= curr_code;
+                if (k != 0)
+                {
+                    k = pow(2, max_length - t - 1);
+                    buff += k;
+                }
+            }
         }
         i++;
     }
