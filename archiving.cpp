@@ -203,7 +203,15 @@ void archive(FILE* target, char output_name[])
         result.push_back(k);
     }
 
-    fprintf(output, "%d", (int)result.size());
+    int length = result.size();
+
+    for (int i = 0 ; i < 4; i++)
+    {
+        unsigned char k = char(length);
+        length >>= 8;
+        fprintf(output, "%c", k);
+    }
+
     for (int i = 0; i < result.size(); i++)
         fprintf(output, "%c", result[i]);
 
