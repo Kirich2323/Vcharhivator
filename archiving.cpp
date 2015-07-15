@@ -176,40 +176,18 @@ void archive(FILE* target, char output_name[])
     max_length = nm[i].l;
     while (i <= 255)
     {
-
         if (max_length == nm[i].l)
         {
             curr_code += 1;
-            for (int t = 0; t < max_length; t++)
-            {
-                  char k = pow(2, t);
-                  k &= curr_code;
-                  str[max_length - t - 1] = k != 0;
-            }
+            nm[i].c = curr_code;
         }
         else
         {
             curr_code += 1;
             curr_code <<= nm[i].l - max_length;
+            nm[i].c = curr_code;
             max_length = nm[i].l;
-
-            for (int t = 0; t < max_length; t++)
-            {
-                  char k = pow(2, t);
-                  k &= curr_code;
-                  str[max_length - t - 1] = k != 0;
-            }
         }
-
-        tmp = head;
-        for (int t = 0; t < max_length; t++)
-        {
-            tmp = link(tmp, str[t]);
-            tmp->p = 0;
-        }
-        tmp->n = nm[i].value;
-        tmp->p = 1;
-
         i++;
     }
 
@@ -218,8 +196,10 @@ void archive(FILE* target, char output_name[])
         s_nm[nm[i].value] = &nm[i];
     }
 
+    printf("ssss\n");
     for (int i = 0; i < 256; i++)
-        fprintf(output, "%c", (char)s_nm[i]->l);
+        printf("%c", s_nm[i]->l);
+    //printf("ssss\n");
     fseek(target, 0, SEEK_SET);
     int j = 0;
     for (j = 0; j < filesize; j++)
@@ -240,6 +220,7 @@ void archive(FILE* target, char output_name[])
         }
     }
 
+    printf("ssss\n");
     if (buf_length > 0)
     {
         char k = invert((unsigned char)buffer);
