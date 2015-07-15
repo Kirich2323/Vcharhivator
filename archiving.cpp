@@ -219,7 +219,7 @@ void archive(FILE* target, char output_name[])
     }
 
     for (int i = 0; i < 256; i++)
-        fprintf(output, "%c", (char)nm[i].l);
+        fprintf(output, "%c", (char)s_nm[i]->l);
     fseek(target, 0, SEEK_SET);
     int j = 0;
     for (j = 0; j < filesize; j++)
