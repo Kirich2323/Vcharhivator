@@ -135,18 +135,17 @@ void decomression_extract()
     {
         fscanf(input, "%c", &buff);
         for (int m = 7; m >= 0; m--){
-            if (!curr_node->ilist){
+            if (curr_node->ilist)
+        {
+            fprintf(output, "%c", curr_node->value);
+            curr_node = head;
+        }
             char k = pow(2, m);
             k &= buff;
             if (k == 0)
                 curr_node = curr_node->left;
             else
                 curr_node = curr_node->right;
-            }
-            else{
-                fprintf(output, "%c", curr_node->value);
-                curr_node = head;
-            }
         }
     }
     return;
