@@ -136,8 +136,6 @@ void decomression_extract(FILE* target, char output_path[])
         c_length += k;
     }
 
-    fscanf(input, "%c", &c_length);
-
     for (i = 0; i < c_length; i++)
     {
         fscanf(target, "%c", &buff);
