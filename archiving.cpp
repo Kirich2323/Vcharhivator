@@ -157,13 +157,13 @@ void archive(FILE* target, char output_name[])
         if (max_length == nm[i].l)
         {
             curr_code += 1;
-            nm[i].c = curr_code;
+            nm[i].c = invert((unsigned char)curr_code) >> (8 - nm[i].l);
         }
         else
         {
             curr_code += 1;
             curr_code <<= nm[i].l - max_length;
-            nm[i].c = curr_code;
+            nm[i].c = invert((unsigned char)curr_code) >> (8 - nm[i].l);
             max_length = nm[i].l;
         }
         i++;
