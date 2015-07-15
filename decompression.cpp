@@ -57,10 +57,9 @@ else
 }
 
 
-void decomression_extract()
+void decomression_extract(FILE* target, char output_path[])
 {
-    FILE* input = fopen("arch2.upa", "rb");
-    FILE* output = fopen("newoutput.txt", "w");
+    FILE* output = fopen(output_path, "w");
     int i, t;
     e_symbol symbols[256];
     head = (node*)malloc(sizeof(node));
