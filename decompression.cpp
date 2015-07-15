@@ -71,7 +71,7 @@ void decomression_extract(FILE* target, char output_path[])
     for (i = 0; i <= 255; i++)
     {
         symbols[i].value = i;
-        fscanf(input, "%c", &symbols[i].code_length);
+        fscanf(target, "%c", &symbols[i].code_length);
     }
 
     stable_sort(symbols, symbols + 256, compare);
@@ -140,7 +140,7 @@ void decomression_extract(FILE* target, char output_path[])
 
     for (i = 0; i < c_length; i++)
     {
-        fscanf(input, "%c", &buff);
+        fscanf(target, "%c", &buff);
         for (int m = 7; m >= 0; m--){
             if (curr_node->ilist)
         {
