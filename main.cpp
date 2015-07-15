@@ -24,7 +24,6 @@ int main(int argc, char* argv[])
         cout << "Wrong amount of arguments" << endl;
         return 0;
     }
-    cout << "sss\n";
 
     if (*argv[1] == 'x')
     {
