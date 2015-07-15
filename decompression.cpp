@@ -33,7 +33,7 @@ return (i.code_length < j.code_length);
 
 node* link (node* e, unsigned char turn){
 node* e_link;
-if (turn == '1')
+if (turn == 1)
 {
     if (e->right == NULL)
     {
