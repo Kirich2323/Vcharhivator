@@ -58,6 +58,8 @@ void c_symbs(symb* e, unsigned char n, int length)
     {
         unsigned char k = (unsigned char)(pow(2, length) - 1) & (unsigned char)str.to_ulong();
         nm[e->n].c = k;
+        if (length == 0)
+            length = 1;
         nm[e->n].l = length;
     }
 
