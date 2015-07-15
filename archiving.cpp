@@ -28,7 +28,7 @@ bitset <32> str;
 typedef struct new_symb{
     char c;
     char l;
-    char value;
+    unsigned char value;
 }new_symb;
 
 new_symb nm[256];
@@ -94,32 +94,6 @@ bool compare_nm(new_symb i, new_symb j)
     return (i.l < j.l);
 }
 
-symb* link (symb* e, char turn)
-{
-    symb* e_link;
-    if (turn == '1')
-        {
-        if (e->right == NULL)
-        {
-            e->right = (symb*)malloc(sizeof(symb));
-            e->right->right = NULL;
-            e->right->left = NULL;
-        }
-        e_link = e->right;
-    }
-    else{
-        if (e->left == NULL)
-        {
-            e->left = (symb*)malloc(sizeof(symb));
-            e->left->right = NULL;
-            e->left->left = NULL;
-        }
-        e_link = e->left;
-    }
-
-    return e_link;
-}
-
 void archive(FILE* target, char output_name[])
 {
     long filesize = getFileSize(target);
@@ -134,6 +108,7 @@ void archive(FILE* target, char output_name[])
     priority_queue <symb*, vector<symb*>, comp> pq(compare);
     int i = 0;
     for(i = 0; i < 256; i++)
+    {
         if (frequency[i])
         {
             symb* e;
@@ -142,8 +117,9 @@ void archive(FILE* target, char output_name[])
             e->n = i;
             e->left = e->right = NULL;
             pq.push(e);
-            nm[i].value = i;
         }
+        nm[i].value = i;
+    }
 
     while(pq.size() != 1)
     {
@@ -196,10 +172,8 @@ void archive(FILE* target, char output_name[])
         s_nm[nm[i].value] = &nm[i];
     }
 
-    printf("ssss\n");
     for (int i = 0; i < 256; i++)
-        printf("%c", s_nm[i]->l);
-    //printf("ssss\n");
+        fprintf(output, "%c", (char)s_nm[i]->l);
     fseek(target, 0, SEEK_SET);
     int j = 0;
     for (j = 0; j < filesize; j++)
@@ -220,7 +194,6 @@ void archive(FILE* target, char output_name[])
         }
     }
 
-    printf("ssss\n");
     if (buf_length > 0)
     {
         char k = invert((unsigned char)buffer);
