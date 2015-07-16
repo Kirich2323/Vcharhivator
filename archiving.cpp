@@ -100,19 +100,22 @@ unsigned int invert_int(unsigned int x)
     return res;
 }
 
+symb* create_symb(int p, int n, symb* t1 = NULL, symb* t2 = NULL)
+{
+    symb* e = (symb*)malloc(sizeof(symb));
+    e->left = t1;
+    e->right = t2;
+    e->n = n;
+    e->p = p;
+    return e;
+}
+
 void fill_priority_queue(void)
 {
     for(int i = 0; i < 256; i++)
     {
         if (frequency[i])
-        {
-            symb* e;
-            e = (symb*)malloc(sizeof(symb));
-            e->p = frequency[i];
-            e->n = i;
-            e->left = e->right = NULL;
-            pq.push(e);
-        }
+            pq.push(create_symb(frequency[i], i));
         nm[i].value = i;
     }
 }
@@ -141,11 +144,7 @@ symb* create_tree(void)
         pq.pop();
         symb* t2 = pq.top();
         pq.pop();
-        symb* e = (symb*)malloc(sizeof(symb));
-        e->left = t1;
-        e->right = t2;
-        e->p = t1->p + t2->p;
-        pq.push(e);
+        pq.push(create_symb(t1->p + t2->p, 0, t1, t2));
     }
     return pq.top();
 }
