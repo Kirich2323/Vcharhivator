@@ -59,7 +59,7 @@ else
 
 void decompression_extract(FILE* target, char output_path[])
 {
-    FILE* output = fopen(output_path, "w");
+    FILE* output = fopen(output_path, "wb");
     int i, t;
     e_symbol symbols[256];
     head = (node*)malloc(sizeof(node));
