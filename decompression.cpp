@@ -64,53 +64,6 @@ void decompression_extract(FILE* target, char output_path[])
     node* tmp;
     curr_node = head;
 
-    char UPA[4] = {'U', 'P', 'A', '\0'};
-    char sign[4];
-    sign[3] = '\0';
-
-    fread(sign, sizeof(char), 3, target);
-
-    if (strcmp(sign, UPA) != 0)
-    {
-        cout << "Wrong file format\n";
-        return;
-    }
-
-    char Alg[5];
-    Alg[4] = '\0';
-    fread(Alg, sizeof(char), 4, target);
-
-    if (strcmp(Alg, "HUFF") != 0)
-    {
-        cout << "Wrong Algoritm";
-        return;
-    }
-
-    char solid;
-    fread(&solid, sizeof(char), 1, target);
-
-    if (solid)
-        cout << "Solid\n";
-    else
-        cout << "Not solid\n";
-
-    unsigned short int files_count;
-    fread(&files_count, sizeof(unsigned short int), 1, target);
-
-    unsigned char filename_length;
-    fread(&filename_length, sizeof(unsigned char), 1, target);
-
-    char* filename = (char*)malloc(filename_length + 2);
-    filename[filename_length] = '\0';
-
-    fread(filename, sizeof(char), filename_length+1, target);
-
-    unsigned long long packed_size = 0;
-    unsigned long long real_size = 0;
-
-    fread(&packed_size, sizeof(unsigned long long), 1, target);
-    fread(&real_size, sizeof(unsigned long long), 1, target);
-
     for (i = 0; i <= 255; i++)
     {
         symbols[i].value = i;
@@ -169,8 +122,17 @@ void decompression_extract(FILE* target, char output_path[])
     }
 
     unsigned char buff;
+    unsigned int c_length;
 
-    while (byte_count < real_size)
+    for (int i = 0 ; i < 4; i++)
+    {
+        unsigned int k = 0;
+        fscanf(target, "%c", &k);
+        k *= pow(2, 8*i);
+        c_length += k;
+    }
+
+    for (i = 0; i < c_length; i++)
     {
         fscanf(target, "%c", &buff);
         for (int m = 7; m >= 0; m--){
@@ -178,9 +140,6 @@ void decompression_extract(FILE* target, char output_path[])
         {
             fprintf(output, "%c", curr_node->value);
             curr_node = head;
-            byte_count++;
-            if (byte_count == real_size)
-                break;
         }
             unsigned char k = pow(2, m);
             k &= buff;
@@ -190,6 +149,5 @@ void decompression_extract(FILE* target, char output_path[])
                 curr_node = curr_node->right;
         }
     }
-
     return;
 }
