@@ -120,6 +120,16 @@ void fill_priority_queue(void)
     }
 }
 
+void fill_frequency(FILE* target, int filesize)
+{
+    for (int i = 0; i < filesize; i++)
+    {
+        unsigned char k;
+        fscanf(target, "%c", &k);
+        frequency[k]++;
+    }
+}
+
 unsigned char calculate_file_name_length(char* file_path)
 {
     int i = -1;
@@ -154,12 +164,7 @@ void archive(char* files[], int files_count)
 
     FILE* output = fopen(files[files_count - 1], "wb");
 
-    for (int i = 0; i < filesize; i++)
-    {
-        unsigned char k;
-        fscanf(target, "%c", &k);
-        frequency[k]++;
-    }
+    fill_frequency(target, filesize);
 
     fill_priority_queue();
 
