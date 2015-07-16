@@ -128,6 +128,12 @@ void fill_frequency(FILE* target, int filesize)
     }
 }
 
+void restore_symbs_order(void)
+{
+    for (int i = 0; i < 256; i++)
+        s_nm[nm[i].value] = &nm[i];
+}
+
 symb* create_tree(void)
 {
     while(pq.size() != 1)
@@ -215,8 +221,7 @@ void archive(char* files[], int files_count)
 
     encode_symbs();
 
-    for (int i = 0; i < 256; i++)
-        s_nm[nm[i].value] = &nm[i];
+    restore_symbs_order();
 
     fprintf(output, "UPA");
     fprintf(output, "HUFF");
