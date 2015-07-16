@@ -33,7 +33,6 @@ typedef struct new_symb{
 new_symb nm[256];
 new_symb* s_nm[256];
 vector <unsigned char> result;
-long long buffer;
 int buf_length = 0;
 
 typedef bool (*comp)(symb*, symb*);
@@ -151,6 +150,12 @@ symb* create_tree(void)
     return pq.top();
 }
 
+void cache_byte(unsigned char b)
+{
+    unsigned char k = invert_char(b);
+    result.push_back(k);
+}
+
 unsigned char calculate_file_name_length(char* file_path)
 {
     int i = -1;
@@ -232,6 +237,8 @@ void archive(char* files[], int files_count)
     for (int i = 0; i < filename_length; i++)
         fprintf(output, "%c", filename[i]);
 
+    long long buffer = 0;
+
     fseek(target, 0, SEEK_SET);
     int j = 0;
     for (j = 0; j < filesize; j++)
@@ -245,18 +252,14 @@ void archive(char* files[], int files_count)
         buf_length += tmp_nm->l;
         while(buf_length > 8)
         {
-            unsigned char k = invert_char((unsigned char)buffer);
-            result.push_back(k);
+            cache_byte((unsigned char)buffer);
             buffer >>= 8;
             buf_length -= 8;
         }
     }
 
     if (buf_length > 0)
-    {
-        unsigned char k = invert_char((unsigned char)buffer);
-        result.push_back(k);
-    }
+        cache_byte((unsigned char)buffer);
 
     unsigned long long length = result.size();
 
