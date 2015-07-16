@@ -154,6 +154,32 @@ unsigned char calculate_file_name_length(char* file_path)
 
     return i - k - 1 ;
 }
+
+void encode_symbs(void)
+{
+    int max_length;
+    int curr_code = -1;
+    int i = -1;
+    while (nm[++i].l == 0);
+    max_length = nm[i].l;
+    while (i <= 255)
+    {
+        if (max_length == nm[i].l)
+        {
+            curr_code += 1;
+            nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
+        }
+        else
+        {
+            curr_code += 1;
+            curr_code <<= nm[i].l - max_length;
+            max_length = nm[i].l;
+            nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
+        }
+        i++;
+    }
+}
+
 void set_filename(char* file_path, char* file_name, int file_name_length)
 {
     int i = -1;
@@ -187,30 +213,8 @@ void archive(char* files[], int files_count)
     c_symbs(root, 0, 0);
     stable_sort(nm, nm + 256, compare_nm);
 
-    int max_length;
-    int curr_code = -1;
+    encode_symbs();
 
-    int i = -1;
-
-    while (nm[++i].l == 0);
-    max_length = nm[i].l;
-
-    while (i <= 255)
-    {
-        if (max_length == nm[i].l)
-        {
-            curr_code += 1;
-            nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
-        }
-        else
-        {
-            curr_code += 1;
-            curr_code <<= nm[i].l - max_length;
-            max_length = nm[i].l;
-            nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
-        }
-        i++;
-    }
     for (int i = 0; i < 256; i++)
         s_nm[nm[i].value] = &nm[i];
 
