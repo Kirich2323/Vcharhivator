@@ -27,7 +27,7 @@ return (i.code_length < j.code_length);
 }
 
 node* node_create(){
-c_node = (node*)malloc(sizeof(node));
+node* c_node = (node*)malloc(sizeof(node));
 c_node->left = NULL;
 c_node->right = NULL;
 return c_node;
