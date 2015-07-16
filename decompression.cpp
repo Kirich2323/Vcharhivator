@@ -94,7 +94,7 @@ void decompression_extract(FILE* target, char output_path[])
             curr_code += 1;
             for (t = 0; t < max_length; t++)
             {
-                  unsigned char k = pow(2, t);
+                  unsigned int k = pow(2, t);
                   k &= curr_code;
                   code[max_length - t - 1] = k != 0;
             }
@@ -107,7 +107,7 @@ void decompression_extract(FILE* target, char output_path[])
 
             for (t = 0; t < max_length; t++)
             {
-                  unsigned char k = pow(2, t);
+                  unsigned int k = pow(2, t);
                   k &= curr_code;
                   code[max_length - t - 1] = k != 0;
             }
@@ -130,7 +130,7 @@ void decompression_extract(FILE* target, char output_path[])
 
     for (int i = 0 ; i < 4; i++)
     {
-        unsigned char k;
+        unsigned int k;
         fscanf(target, "%c", &k);
         k *= pow(2, 8*i);
         c_length += k;
