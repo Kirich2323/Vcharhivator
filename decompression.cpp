@@ -8,7 +8,6 @@
 
 using namespace std;
 
-
 typedef struct node{
 unsigned char value;
 node* left;
@@ -16,14 +15,10 @@ node* right;
 bool leaf;
 }node;
 
-node* head;
-node* curr_node;
-
 typedef struct encoded_symbol{
 unsigned char value;
 unsigned char code_length;
 }e_symbol;
-
 
 bool cmp(e_symbol i, e_symbol j){
 if (i.code_length == j.code_length)
@@ -63,7 +58,7 @@ void decompression_extract(FILE* target, char output_path[])
     e_symbol symbols[256];
     node* head = node_create();
     node* tmp;
-    curr_node = head;
+    node* curr_node = head;
 
     char UPA[4] = {'U', 'P', 'A', '\0'};
     char sign[4];
