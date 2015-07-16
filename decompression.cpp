@@ -31,26 +31,24 @@ if (i.code_length == j.code_length)
 return (i.code_length < j.code_length);
 }
 
+void node_create(node* c_node){
+c_node = (node*)malloc(sizeof(node));
+c_node->left = NULL;
+c_node->right = NULL;
+}
+
 node* link (node* e, unsigned char turn){
 node* e_link;
 if (turn == 1)
 {
     if (e->right == NULL)
-    {
-    e->right = (node*)malloc(sizeof(node));
-    e->right->right = NULL;
-    e->right->left = NULL;
-    }
+        node_create(e->right);
     e_link = e->right;
 }
 else
 {
     if (e->left == NULL)
-    {
-    e->left = (node*)malloc(sizeof(node));
-    e->left->right = NULL;
-    e->left->left = NULL;
-    }
+        node_create(e->left)
     e_link = e->left;
 }
     return e_link;
@@ -62,9 +60,7 @@ void decompression_extract(FILE* target, char output_path[])
     FILE* output = fopen(output_path, "wb");
     int i, t;
     e_symbol symbols[256];
-    head = (node*)malloc(sizeof(node));
-    head->left = NULL;
-    head->right = NULL;
+    node_create(head);
     node* tmp;
     curr_node = head;
 
