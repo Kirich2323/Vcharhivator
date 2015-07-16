@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
-
+#include <cstring>
 
 using namespace std;
 
@@ -31,10 +31,11 @@ if (i.code_length == j.code_length)
 return (i.code_length < j.code_length);
 }
 
-void node_create(node* c_node){
+node* node_create(){
 c_node = (node*)malloc(sizeof(node));
 c_node->left = NULL;
 c_node->right = NULL;
+return c_node;
 }
 
 node* link (node* current_node, unsigned char turn){
@@ -42,13 +43,13 @@ node* link_of_node;
 if (turn == 1)
 {
     if (current_node->right == NULL)
-        node_create(current_node->right);
+        current_node->right = node_create();
     link_of_node = current_node->right;
 }
 else
 {
     if (current_node->left == NULL)
-        node_create(current_node->left)
+        current_node->left = node_create();
     link_of_node = current_node->left;
 }
     return link_of_node;
@@ -60,7 +61,7 @@ void decompression_extract(FILE* target, char output_path[])
     FILE* output = fopen(output_path, "wb");
     int i, t;
     e_symbol symbols[256];
-    node_create(head);
+    node* head = node_create();
     node* tmp;
     curr_node = head;
 
@@ -169,7 +170,7 @@ void decompression_extract(FILE* target, char output_path[])
     }
 
     unsigned char buff;
-    unsigned long long c_length;
+    unsigned long long byte_count = 0;
 
     while (byte_count < real_size)
     {
