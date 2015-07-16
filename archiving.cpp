@@ -91,6 +91,18 @@ unsigned char invert(unsigned char x)
     return res;
 }
 
+unsigned int invert_int(unsigned int x)
+{
+    long long int base = 4294967296;
+    unsigned int  res = 0;
+    while (x != 0)
+    {
+        res += (x & 1) * (base >>= 1);
+        x >>= 1;
+    }
+    return res;
+}
+
 bool compare_nm(new_symb i, new_symb j)
 {
     return (i.l < j.l);
@@ -157,14 +169,14 @@ void archive(FILE* target, char output_name[])
         if (max_length == nm[i].l)
         {
             curr_code += 1;
-            nm[i].c = invert((unsigned char)curr_code) >> (8 - nm[i].l);
+            nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
         }
         else
         {
             curr_code += 1;
             curr_code <<= nm[i].l - max_length;
-            nm[i].c = invert((unsigned char)curr_code) >> (8 - nm[i].l);
             max_length = nm[i].l;
+            nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
         }
         i++;
     }
