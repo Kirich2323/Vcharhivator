@@ -20,6 +20,8 @@ bool chek_exist(char path[])
 
 int main(int argc, char* argv[])
 {
+    int files_count = 0;
+    char* files[argc - 2];
     if (argc < 3)
     {
         cout << "Wrong amount of arguments" << endl;
@@ -28,6 +30,9 @@ int main(int argc, char* argv[])
 
     if (*argv[1] == 'x')
     {
+        for (int i = 2; i < argc - 1; i++)
+            if (chek_exist(argv[i]))
+
         if (chek_exist(argv[2]))
         {
             cout << "Extracting\n";
@@ -36,11 +41,12 @@ int main(int argc, char* argv[])
     }
     else if (*argv[1] == 'a')
     {
-        if (chek_exist(argv[2]))
-        {
+        for (int i = 2; i < argc - 1; i++)
+            if (chek_exist(argv[i]))
+                files[files_count++] = argv[i];
+            files[files_count++] = argv[argc - 1];
             cout << "Archiving\n";
-            archive(target, argv[argc - 1]);
-        }
+            archive(files, files_count);
     }
     return 0;
 }

@@ -108,10 +108,11 @@ bool compare_nm(new_symb i, new_symb j)
     return (i.l < j.l);
 }
 
-void archive(FILE* target, char output_name[])
+void archive(char* files[], int files_count)
 {
+    FILE* target = fopen(files[0], "rb");
     long filesize = getFileSize(target);
-    FILE* output = fopen(output_name, "wb");
+    FILE* output = fopen(files[files_count - 1], "wb");
     for (int i = 0; i < filesize; i++)
     {
         unsigned char k;
