@@ -37,21 +37,21 @@ c_node->left = NULL;
 c_node->right = NULL;
 }
 
-node* link (node* e, unsigned char turn){
-node* e_link;
+node* link (node* current_node, unsigned char turn){
+node* link_of_node;
 if (turn == 1)
 {
-    if (e->right == NULL)
-        node_create(e->right);
-    e_link = e->right;
+    if (current_node->right == NULL)
+        node_create(current_node->right);
+    link_of_node = current_node->right;
 }
 else
 {
-    if (e->left == NULL)
-        node_create(e->left)
-    e_link = e->left;
+    if (current_node->left == NULL)
+        node_create(current_node->left)
+    link_of_node = current_node->left;
 }
-    return e_link;
+    return link_of_node;
 }
 
 
