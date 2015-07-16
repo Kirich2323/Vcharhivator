@@ -11,7 +11,6 @@
 
 using namespace std;
 
-int N = 0;
 #define INF 100000000
 
 long frequency[256];
@@ -177,11 +176,6 @@ void archive(char* files[], int files_count)
     int curr_code = -1;
 
     i = -1;
-
-    symb* tmp;
-    symb* head = (symb*)malloc(sizeof(symb));
-    head->left = NULL;
-    head->right = NULL;
 
     while (nm[++i].l == 0);
     max_length = nm[i].l;
