@@ -127,11 +127,15 @@ bool compare_nm(new_symb i, new_symb j)
 void archive(char* files[], int files_count)
 {
     FILE* target = fopen(files[0], "rb");
+
     char filename_length = calculate_file_name_length(files[0]);
     char* filename = (char*)malloc(filename_length);
     set_filename(files[0], filename, filename_length);
+
     long filesize = getFileSize(target);
+
     FILE* output = fopen(files[files_count - 1], "wb");
+
     for (int i = 0; i < filesize; i++)
     {
         unsigned char k;
@@ -185,7 +189,6 @@ void archive(char* files[], int files_count)
         if (max_length == nm[i].l)
         {
             curr_code += 1;
-<<<<<<< HEAD
             unsigned char buff = 0;
             for (int t = 0; t < max_length; t++)
             {
@@ -197,17 +200,13 @@ void archive(char* files[], int files_count)
                     buff += k;
                 }
             }
-            nm[i].c = buff;
-=======
             nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
->>>>>>> 66556d1eb1f3167f804fb7cd593330fa9024d999
         }
         else
         {
             curr_code += 1;
             curr_code <<= nm[i].l - max_length;
             max_length = nm[i].l;
-<<<<<<< HEAD
             unsigned char buff = 0;
             for (int t = 0; t < max_length; t++)
             {
@@ -219,27 +218,21 @@ void archive(char* files[], int files_count)
                     buff += k;
                 }
             }
-=======
             nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
->>>>>>> 66556d1eb1f3167f804fb7cd593330fa9024d999
         }
         i++;
     }
     for (int i = 0; i < 256; i++)
-    {
         s_nm[nm[i].value] = &nm[i];
-    }
 
     fprintf(output, "UPA");
     fprintf(output, "HUFF");
     fprintf(output, "%c", 1);
-    //unsigned short int - count
     fprintf(output, "%c", 1);
     fprintf(output, "%c", 0);
-    //-------------------------
     fprintf(output, "%c", filename_length - 1);
     for (int i = 0; i < filename_length; i++)
-        fprintf(output, "%c", filename[i] + 7);
+        fprintf(output, "%c", filename[i]);
 
     fseek(target, 0, SEEK_SET);
     int j = 0;
@@ -269,14 +262,14 @@ void archive(char* files[], int files_count)
 
     int length = result.size();
 
-   for (int i = 0 ; i < 8; i++)
+    for (int i = 0; i < 8; i++)
     {
         unsigned char k = (char)length;
         length >>= 8;
         fprintf(output, "%c", k);
     }
 
-    for (int i = 0 ; i < 8; i++)
+    for (int i = 0; i < 8; i++)
     {
         unsigned char k = (char)filesize;
         filesize >>= 8;
