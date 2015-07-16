@@ -264,19 +264,9 @@ void archive(char* files[], int files_count)
 
     unsigned long long length = result.size();
 
-    for (int i = 0; i < 8; i++)
-    {
-        unsigned char k = (char)length;
-        length >>= 8;
-        fprintf(output, "%c", k);
-    }
+    fwrite(&length, sizeof(unsigned long long), 1, output);
 
-    for (int i = 0; i < 8; i++)
-    {
-        unsigned char k = (char)filesize;
-        filesize >>= 8;
-        fprintf(output, "%c", k);
-    }
+    fwrite(&files, sizeof(unsigned long long), 1, output);
 
     for (int i = 0; i < 256; i++)
         fprintf(output, "%c", (unsigned char)s_nm[i]->l);
