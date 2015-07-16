@@ -8,7 +8,6 @@
 
 using namespace std;
 
-
 typedef struct node{
 unsigned char value;
 node* left;
@@ -16,14 +15,10 @@ node* right;
 bool leaf;
 }node;
 
-node* head;
-node* curr_node;
-
 typedef struct encoded_symbol{
 unsigned char value;
 unsigned char code_length;
 }e_symbol;
-
 
 bool cmp(e_symbol i, e_symbol j){
 if (i.code_length == j.code_length)
@@ -32,7 +27,7 @@ return (i.code_length < j.code_length);
 }
 
 node* node_create(){
-c_node = (node*)malloc(sizeof(node));
+node* c_node = (node*)malloc(sizeof(node));
 c_node->left = NULL;
 c_node->right = NULL;
 return c_node;
@@ -63,7 +58,7 @@ void decompression_extract(FILE* target, char output_path[])
     e_symbol symbols[256];
     node* head = node_create();
     node* tmp;
-    curr_node = head;
+    node* curr_node = head;
 
     char UPA[4] = {'U', 'P', 'A', '\0'};
     char sign[4];
@@ -134,27 +129,19 @@ void decompression_extract(FILE* target, char output_path[])
     while (i <= 255)
     {
         if (max_length == symbols[i].code_length)
-        {
             curr_code += 1;
-            for (t = 0; t < max_length; t++)
-            {
-                  unsigned int k = pow(2, t);
-                  k &= curr_code;
-                  code[max_length - t - 1] = k != 0;
-            }
-        }
         else
         {
             curr_code += 1;
             curr_code <<= symbols[i].code_length - max_length;
             max_length = symbols[i].code_length;
+        }
 
-            for (t = 0; t < max_length; t++)
-            {
-                  unsigned int k = pow(2, t);
-                  k &= curr_code;
-                  code[max_length - t - 1] = k != 0;
-            }
+        for (t = 0; t < max_length; t++)
+        {
+            unsigned int k = pow(2, t);
+            k &= curr_code;
+            code[max_length - t - 1] = k != 0;
         }
 
     tmp = head;
