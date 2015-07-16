@@ -240,7 +240,10 @@ void archive(char* files[], unsigned short int files_count)
     unsigned short int fc = files_count - 1;
     fprintf(output, "UPA");
     fprintf(output, "HUFF");
-    fprintf(output, "%c", 1);
+    if (files_count > 2 )
+        fprintf(output, "%c", 0);
+    else
+        fprintf(output, "%c", 1);
     fwrite(&fc, sizeof(unsigned short int), 1, output);
 
     for (int i = 0; i < files_count - 1; i++)
