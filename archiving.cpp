@@ -130,6 +130,23 @@ void fill_frequency(FILE* target, int filesize)
     }
 }
 
+symb* create_tree(void)
+{
+    while(pq.size() != 1)
+    {
+        symb* t1 = pq.top();
+        pq.pop();
+        symb* t2 = pq.top();
+        pq.pop();
+        symb* e = (symb*)malloc(sizeof(symb));
+        e->left = t1;
+        e->right = t2;
+        e->p = t1->p + t2->p;
+        pq.push(e);
+    }
+    return pq.top();
+}
+
 unsigned char calculate_file_name_length(char* file_path)
 {
     int i = -1;
@@ -168,20 +185,8 @@ void archive(char* files[], int files_count)
 
     fill_priority_queue();
 
-    while(pq.size() != 1)
-    {
-        symb* t1 = pq.top();
-        pq.pop();
-        symb* t2 = pq.top();
-        pq.pop();
-        symb* e = (symb*)malloc(sizeof(symb));
-        e->left = t1;
-        e->right = t2;
-        e->p = t1->p + t2->p;
-        pq.push(e);
-    }
-
-    c_symbs(pq.top(), 0, 0);
+    symb* root = create_tree();
+    c_symbs(root, 0, 0);
     stable_sort(nm, nm + 256, compare_nm);
 
     int max_length;
