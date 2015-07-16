@@ -235,7 +235,7 @@ void archive(char* files[], int files_count)
     char* filename = (char*)malloc(filename_length);
     set_filename(files[0], filename, filename_length);
 
-    long filesize = getFileSize(target);
+    unsigned long long filesize = getFileSize(target);
 
     FILE* output = fopen(files[files_count - 1], "wb");
 
@@ -266,7 +266,7 @@ void archive(char* files[], int files_count)
 
     fwrite(&length, sizeof(unsigned long long), 1, output);
 
-    fwrite(&files, sizeof(unsigned long long), 1, output);
+    fwrite(&filesize, sizeof(unsigned long long), 1, output);
 
     for (int i = 0; i < 256; i++)
         fprintf(output, "%c", (unsigned char)s_nm[i]->l);
