@@ -33,7 +33,6 @@ typedef struct new_symb{
 new_symb nm[256];
 new_symb* s_nm[256];
 vector <unsigned char> result;
-int buf_length = 0;
 
 typedef bool (*comp)(symb*, symb*);
 bool compare(symb* x1, symb* x2)
@@ -73,6 +72,7 @@ long getFileSize(FILE *file)
     fseek(file, 0, 2);
     lEndPos = ftell(file);
     fseek(file, lCurPos, 0);
+    fseek(file, 0, 0);
     return lEndPos;
 }
 
@@ -100,7 +100,7 @@ unsigned int invert_int(unsigned int x)
     return res;
 }
 
-symb* create_symb(int p, int n, symb* t1 = NULL, symb* t2 = NULL)
+symb* create_symb(int p, unsigned char n, symb* t1 = NULL, symb* t2 = NULL)
 {
     symb* e = (symb*)malloc(sizeof(symb));
     e->left = t1;
@@ -115,7 +115,7 @@ void fill_priority_queue(void)
     for(int i = 0; i < 256; i++)
     {
         if (frequency[i])
-            pq.push(create_symb(frequency[i], i));
+           pq.push(create_symb(frequency[i], i));
         nm[i].value = i;
     }
 }
@@ -190,9 +190,15 @@ void encode_symbs(void)
     }
 }
 
+long offset(FILE* file)
+{
+    long current_cursos = ftell(file);
+}
+
 void huff_compression(FILE* target, int filesize)
 {
     fseek(target, 0, SEEK_SET);
+    int buf_length = 0;
     long long buffer = 0;
     for (int j = 0; j < filesize; j++)
     {
@@ -227,52 +233,80 @@ bool compare_nm(new_symb i, new_symb j)
     return (i.l < j.l);
 }
 
-void archive(char* files[], int files_count)
+void archive(char* files[], unsigned short int files_count)
 {
-    FILE* target = fopen(files[0], "rb");
-
-    char filename_length = calculate_file_name_length(files[0]);
-    char* filename = (char*)malloc(filename_length);
-    set_filename(files[0], filename, filename_length);
-
-    unsigned long long filesize = getFileSize(target);
-
     FILE* output = fopen(files[files_count - 1], "wb");
-
-    fill_frequency(target, filesize);
-
-    fill_priority_queue();
-
-    symb* root = create_tree();
-    c_symbs(root, 0, 0);
-    stable_sort(nm, nm + 256, compare_nm);
-
-    encode_symbs();
-
-    restore_symbs_order();
-
+    long offsets[files_count - 1];
+    unsigned short int fc = files_count - 1;
     fprintf(output, "UPA");
     fprintf(output, "HUFF");
     fprintf(output, "%c", 1);
-    fprintf(output, "%c", 1);
-    fprintf(output, "%c", 0);
-    fprintf(output, "%c", filename_length - 1);
-    for (int i = 0; i < filename_length; i++)
-        fprintf(output, "%c", filename[i]);
+    fwrite(&fc, sizeof(unsigned short int), 1, output);
 
-    huff_compression(target, filesize);
+    for (int i = 0; i < files_count - 1; i++)
+    {
+        FILE* target = fopen(files[i], "rb");
 
-    unsigned long long length = result.size();
+        char filename_length = calculate_file_name_length(files[i]);
+        char filename[filename_length];
+        set_filename(files[i], filename, filename_length);
 
-    fwrite(&length, sizeof(unsigned long long), 1, output);
+        fprintf(output, "%c", filename_length - 1);
+        for (int i = 0; i < filename_length; i++)
+            fprintf(output, "%c", filename[i]);
 
-    fwrite(&filesize, sizeof(unsigned long long), 1, output);
 
-    for (int i = 0; i < 256; i++)
-        fprintf(output, "%c", (unsigned char)s_nm[i]->l);
+        offsets[i] = ftell(output);
+        fseek(output, 16, SEEK_CUR);
+        fclose(target);
+    }
 
-    for (int i = 0; i < result.size(); i++)
-        fprintf(output, "%c", result[i]);
+    for (int i = 0; i < files_count - 1; i++)
+    {
+        FILE* target = fopen(files[i], "rb");
+        if (!pq.empty())
+            pq.pop();
+
+        for (int i = 0; i < 256; i++)
+        {
+            frequency[i] = 0;
+            nm[i].c = 0;
+            nm[i].l = 0;
+            nm[i].value = 0;
+        }
+
+        result.clear();
+
+        unsigned long long filesize = getFileSize(target);
+
+        fill_frequency(target, filesize);
+
+        fill_priority_queue();
+
+        symb* root = create_tree();
+        c_symbs(root, 0, 0);
+        stable_sort(nm, nm + 256, compare_nm);
+
+        encode_symbs();
+
+        restore_symbs_order();
+
+        huff_compression(target, filesize);
+
+        unsigned long long length = result.size();
+
+        long current_position = ftell(output);
+        fseek(output, offsets[i], SEEK_SET);
+        fwrite(&length, sizeof(unsigned long long), 1, output);
+        fwrite(&filesize, sizeof(unsigned long long), 1, output);
+        fseek(output, current_position, SEEK_SET);
+
+        for (int i = 0; i < 256; i++)
+            fprintf(output, "%c", (unsigned char)s_nm[i]->l);
+
+        for (int i = 0; i < result.size(); i++)
+            fprintf(output, "%c", result[i]);
+    }
 
     return;
 }
