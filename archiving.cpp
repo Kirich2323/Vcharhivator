@@ -11,7 +11,6 @@
 
 using namespace std;
 
-int N = 0;
 #define INF 100000000
 
 long frequency[256];
@@ -26,8 +25,8 @@ typedef struct symb{
 bitset <32> str;
 
 typedef struct new_symb{
-    unsigned char c;
-    unsigned char l;
+    unsigned int c;
+    unsigned int l;
     unsigned char value;
 }new_symb;
 
@@ -56,7 +55,7 @@ void c_symbs(symb* e, unsigned char n, int length)
         c_symbs(t->left, 0, length + 1);
     else
     {
-        unsigned char k = (unsigned char)(pow(2, length) - 1) & (unsigned char)str.to_ulong();
+        int k = (int)(pow(2, length) - 1) & (int)str.to_ulong();
         nm[e->n].c = k;
         if (length == 0)
             length = 1;
@@ -79,7 +78,7 @@ long getFileSize(FILE *file)
     return lEndPos;
 }
 
-unsigned char invert(unsigned char x)
+unsigned char invert_char(unsigned char x)
 {
     int base = 256;
     unsigned char  res = 0;
@@ -91,15 +90,48 @@ unsigned char invert(unsigned char x)
     return res;
 }
 
+unsigned int invert_int(unsigned int x)
+{
+    long long int base = 4294967296;
+    unsigned int  res = 0;
+    while (x != 0)
+    {
+        res += (x & 1) * (base >>= 1);
+        x >>= 1;
+    }
+    return res;
+}
+
+unsigned char calculate_file_name_length(char* file_path)
+{
+    int i = -1;
+    while (file_path[++i] != '\0');
+    int k = i;
+    while (file_path[--k] != '\\');
+
+    return i - k - 1 ;
+}
+void set_filename(char* file_path, char* file_name, int file_name_length)
+{
+    int i = -1;
+    while(file_path[++i] != '\0');
+    for (;file_name_length >= 0; file_name_length--, i--)
+        file_name[file_name_length] = file_path[i];
+}
+
 bool compare_nm(new_symb i, new_symb j)
 {
     return (i.l < j.l);
 }
 
-void archive(FILE* target, char output_name[])
+void archive(char* files[], int files_count)
 {
+    FILE* target = fopen(files[0], "rb");
+    char filename_length = calculate_file_name_length(files[0]);
+    char* filename = (char*)malloc(filename_length);
+    set_filename(files[0], filename, filename_length);
     long filesize = getFileSize(target);
-    FILE* output = fopen(output_name, "wb");
+    FILE* output = fopen(files[files_count - 1], "wb");
     for (int i = 0; i < filesize; i++)
     {
         unsigned char k;
@@ -145,18 +177,15 @@ void archive(FILE* target, char output_name[])
 
     i = -1;
 
-    symb* tmp;
-    symb* head = (symb*)malloc(sizeof(symb));
-    head->left = NULL;
-    head->right = NULL;
-
     while (nm[++i].l == 0);
     max_length = nm[i].l;
+
     while (i <= 255)
     {
         if (max_length == nm[i].l)
         {
             curr_code += 1;
+<<<<<<< HEAD
             unsigned char buff = 0;
             for (int t = 0; t < max_length; t++)
             {
@@ -169,12 +198,16 @@ void archive(FILE* target, char output_name[])
                 }
             }
             nm[i].c = buff;
+=======
+            nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
+>>>>>>> 66556d1eb1f3167f804fb7cd593330fa9024d999
         }
         else
         {
             curr_code += 1;
             curr_code <<= nm[i].l - max_length;
             max_length = nm[i].l;
+<<<<<<< HEAD
             unsigned char buff = 0;
             for (int t = 0; t < max_length; t++)
             {
@@ -186,16 +219,27 @@ void archive(FILE* target, char output_name[])
                     buff += k;
                 }
             }
+=======
+            nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
+>>>>>>> 66556d1eb1f3167f804fb7cd593330fa9024d999
         }
         i++;
     }
-
     for (int i = 0; i < 256; i++)
     {
         s_nm[nm[i].value] = &nm[i];
     }
-    for (int i = 0; i < 256; i++)
-        fprintf(output, "%c", (unsigned char)s_nm[i]->l);
+
+    fprintf(output, "UPA");
+    fprintf(output, "HUFF");
+    fprintf(output, "%c", 1);
+    //unsigned short int - count
+    fprintf(output, "%c", 1);
+    fprintf(output, "%c", 0);
+    //-------------------------
+    fprintf(output, "%c", filename_length - 1);
+    for (int i = 0; i < filename_length; i++)
+        fprintf(output, "%c", filename[i] + 7);
 
     fseek(target, 0, SEEK_SET);
     int j = 0;
@@ -210,28 +254,37 @@ void archive(FILE* target, char output_name[])
         buf_length += tmp_nm->l;
         while(buf_length > 8)
         {
-            unsigned char k = invert((unsigned char)buffer);
+            unsigned char k = invert_char((unsigned char)buffer);
             result.push_back(k);
             buffer >>= 8;
             buf_length -= 8;
         }
     }
 
-
     if (buf_length > 0)
     {
-        unsigned char k = invert((unsigned char)buffer);
+        unsigned char k = invert_char((unsigned char)buffer);
         result.push_back(k);
     }
 
     int length = result.size();
 
-    for (int i = 0 ; i < 4; i++)
+   for (int i = 0 ; i < 8; i++)
     {
-        unsigned char k = char(length);
+        unsigned char k = (char)length;
         length >>= 8;
         fprintf(output, "%c", k);
     }
+
+    for (int i = 0 ; i < 8; i++)
+    {
+        unsigned char k = (char)filesize;
+        filesize >>= 8;
+        fprintf(output, "%c", k);
+    }
+
+    for (int i = 0; i < 256; i++)
+        fprintf(output, "%c", (unsigned char)s_nm[i]->l);
 
     for (int i = 0; i < result.size(); i++)
         fprintf(output, "%c", result[i]);

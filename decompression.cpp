@@ -25,7 +25,7 @@ unsigned char code_length;
 }e_symbol;
 
 
-bool compare (e_symbol i, e_symbol j){
+bool cmp(e_symbol i, e_symbol j){
 if (i.code_length == j.code_length)
     return (i.value < j.value);
 return (i.code_length < j.code_length);
@@ -33,7 +33,7 @@ return (i.code_length < j.code_length);
 
 node* link (node* e, unsigned char turn){
 node* e_link;
-if (turn == '1')
+if (turn == 1)
 {
     if (e->right == NULL)
     {
@@ -57,9 +57,9 @@ else
 }
 
 
-void decomression_extract(FILE* target, char output_path[])
+void decompression_extract(FILE* target, char output_path[])
 {
-    FILE* output = fopen(output_path, "w");
+    FILE* output = fopen(output_path, "wb");
     int i, t;
     e_symbol symbols[256];
     head = (node*)malloc(sizeof(node));
@@ -74,7 +74,7 @@ void decomression_extract(FILE* target, char output_path[])
         fscanf(target, "%c", &symbols[i].code_length);
     }
 
-    stable_sort(symbols, symbols + 256, compare);
+    stable_sort(symbols, symbols + 256, cmp);
 
     int max_length;
     int max_code = 0;
@@ -94,7 +94,7 @@ void decomression_extract(FILE* target, char output_path[])
             curr_code += 1;
             for (t = 0; t < max_length; t++)
             {
-                  unsigned char k = pow(2, t);
+                  unsigned int k = pow(2, t);
                   k &= curr_code;
                   code[max_length - t - 1] = k != 0;
             }
@@ -107,7 +107,7 @@ void decomression_extract(FILE* target, char output_path[])
 
             for (t = 0; t < max_length; t++)
             {
-                  unsigned char k = pow(2, t);
+                  unsigned int k = pow(2, t);
                   k &= curr_code;
                   code[max_length - t - 1] = k != 0;
             }
@@ -130,7 +130,7 @@ void decomression_extract(FILE* target, char output_path[])
 
     for (int i = 0 ; i < 4; i++)
     {
-        unsigned char k;
+        unsigned int k = 0;
         fscanf(target, "%c", &k);
         k *= pow(2, 8*i);
         c_length += k;
