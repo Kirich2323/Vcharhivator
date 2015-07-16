@@ -56,8 +56,6 @@ void c_symbs(symb* e, unsigned char n, int length)
         c_symbs(t->left, 0, length + 1);
     else
     {
-        int k = (int)(pow(2, length) - 1) & (int)str.to_ulong();
-        nm[e->n].c = k;
         if (length == 0)
             length = 1;
         nm[e->n].l = length;
@@ -190,7 +188,6 @@ void archive(char* files[], int files_count)
     stable_sort(nm, nm + 256, compare_nm);
 
     int max_length;
-    int max_code = 0;
     int curr_code = -1;
 
     int i = -1;
@@ -203,17 +200,6 @@ void archive(char* files[], int files_count)
         if (max_length == nm[i].l)
         {
             curr_code += 1;
-            unsigned char buff = 0;
-            for (int t = 0; t < max_length; t++)
-            {
-                unsigned char k = pow(2, t);
-                k &= curr_code;
-                if (k != 0)
-                {
-                    k = pow(2, max_length - t - 1);
-                    buff += k;
-                }
-            }
             nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
         }
         else
@@ -221,17 +207,6 @@ void archive(char* files[], int files_count)
             curr_code += 1;
             curr_code <<= nm[i].l - max_length;
             max_length = nm[i].l;
-            unsigned char buff = 0;
-            for (int t = 0; t < max_length; t++)
-            {
-                unsigned char k = pow(2, t);
-                k &= curr_code;
-                if (k != 0)
-                {
-                    k = pow(2, max_length - t - 1);
-                    buff += k;
-                }
-            }
             nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
         }
         i++;
