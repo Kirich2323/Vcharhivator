@@ -1,293 +1,198 @@
 #include <iostream>
+#include <string>
 #include <stdio.h>
 #include <cstdlib>
-#include <string.h>
-#include <string>
-#include <vector>
-#include <bitset>
 #include <cmath>
-#include <queue>
 #include <algorithm>
+#include <cstring>
 
 using namespace std;
 
-#define INF 100000000
+typedef struct node{
+unsigned char value;
+node* left;
+node* right;
+bool ilist;
+}node;
 
-long frequency[256];
+node* head;
+node* curr_node;
 
-typedef struct symb{
-    int p = 0;
-    unsigned char n;
-    struct symb* left;
-    struct symb* right;
-}symb;
+typedef struct encoded_symbol{
+unsigned char value;
+unsigned char code_length;
+}e_symbol;
 
-bitset <32> str;
 
-typedef struct new_symb{
-    unsigned int c;
-    unsigned int l;
-    unsigned char value;
-}new_symb;
-
-new_symb nm[256];
-new_symb* s_nm[256];
-vector <unsigned char> result;
-long long buffer;
-int buf_length = 0;
-
-typedef bool (*comp)(symb*, symb*);
-bool compare(symb* x1, symb* x2)
-{
-    return (x1->p > x2->p);
+bool cmp(e_symbol i, e_symbol j){
+if (i.code_length == j.code_length)
+    return (i.value < j.value);
+return (i.code_length < j.code_length);
 }
 
-void c_symbs(symb* e, unsigned char n, int length)
+node* link (node* e, unsigned char turn){
+node* e_link;
+if (turn == 1)
 {
-    symb* t = e;
-    int is_print = 0;
-    if (length > 0)
-        str[length - 1] = n;
+    if (e->right == NULL)
+    {
+    e->right = (node*)malloc(sizeof(node));
+    e->right->right = NULL;
+    e->right->left = NULL;
+    }
+    e_link = e->right;
+}
+else
+{
+    if (e->left == NULL)
+    {
+    e->left = (node*)malloc(sizeof(node));
+    e->left->right = NULL;
+    e->left->left = NULL;
+    }
+    e_link = e->left;
+}
+    return e_link;
+}
+
+
+void decompression_extract(FILE* target, char output_path[])
+{
+    FILE* output = fopen(output_path, "wb");
+    int i, t;
+    e_symbol symbols[256];
+    head = (node*)malloc(sizeof(node));
+    head->left = NULL;
+    head->right = NULL;
+    node* tmp;
+    curr_node = head;
+
+    char UPA[4] = {'U', 'P', 'A', '\0'};
+    char sign[4];
+    sign[3] = '\0';
+
+    fread(sign, sizeof(char), 3, target);
+
+    if (strcmp(sign, UPA) != 0)
+    {
+        cout << "Wrong file format\n";
+        return;
+    }
+
+    char Alg[5];
+    Alg[4] = '\0';
+    fread(Alg, sizeof(char), 4, target);
+
+    if (strcmp(Alg, "HUFF") != 0)
+    {
+        cout << "Wrong Algoritm";
+        return;
+    }
+
+    char solid;
+    fread(&solid, sizeof(char), 1, target);
+
+    if (solid)
+        cout << "Solid\n";
     else
-        str[length] = n;
+        cout << "Not solid\n";
 
-    if (t->left)
-        c_symbs(t->left, 0, length + 1);
-    else
+    unsigned short int files_count;
+    fread(&files_count, sizeof(unsigned short int), 1, target);
+
+    unsigned char filename_length;
+    fread(&filename_length, sizeof(unsigned char), 1, target);
+
+    char* filename = (char*)malloc(filename_length + 2);
+    filename[filename_length] = '\0';
+
+    fread(filename, sizeof(char), filename_length+1, target);
+
+    unsigned long long packed_size = 0;
+    unsigned long long real_size = 0;
+
+    fread(&packed_size, sizeof(unsigned long long), 1, target);
+    fread(&real_size, sizeof(unsigned long long), 1, target);
+
+    for (i = 0; i <= 255; i++)
     {
-        int k = (int)(pow(2, length) - 1) & (int)str.to_ulong();
-        nm[e->n].c = k;
-        if (length == 0)
-            length = 1;
-        nm[e->n].l = length;
+        symbols[i].value = i;
+        fscanf(target, "%c", &symbols[i].code_length);
     }
 
-    if (t->right)
-        c_symbs(t->right, 1, length + 1);
-
-    return;
-}
-
-long getFileSize(FILE *file)
-{
-    long lCurPos, lEndPos;
-    lCurPos = ftell(file);
-    fseek(file, 0, 2);
-    lEndPos = ftell(file);
-    fseek(file, lCurPos, 0);
-    return lEndPos;
-}
-
-unsigned char invert_char(unsigned char x)
-{
-    int base = 256;
-    unsigned char  res = 0;
-    while (x != 0)
-    {
-        res += (x & 1) * (base >>= 1);
-        x >>= 1;
-    }
-    return res;
-}
-
-unsigned int invert_int(unsigned int x)
-{
-    long long int base = 4294967296;
-    unsigned int  res = 0;
-    while (x != 0)
-    {
-        res += (x & 1) * (base >>= 1);
-        x >>= 1;
-    }
-    return res;
-}
-
-unsigned char calculate_file_name_length(char* file_path)
-{
-    int i = -1;
-    while (file_path[++i] != '\0');
-    int k = i;
-    while (file_path[--k] != '\\');
-
-    return i - k - 1 ;
-}
-void set_filename(char* file_path, char* file_name, int file_name_length)
-{
-    int i = -1;
-    while(file_path[++i] != '\0');
-    for (;file_name_length >= 0; file_name_length--, i--)
-        file_name[file_name_length] = file_path[i];
-}
-
-bool compare_nm(new_symb i, new_symb j)
-{
-    return (i.l < j.l);
-}
-
-void archive(char* files[], int files_count)
-{
-    FILE* target = fopen(files[0], "rb");
-    char filename_length = calculate_file_name_length(files[0]);
-    char* filename = (char*)malloc(filename_length);
-    set_filename(files[0], filename, filename_length);
-    long filesize = getFileSize(target);
-    FILE* output = fopen(files[files_count - 1], "wb");
-    for (int i = 0; i < filesize; i++)
-    {
-        unsigned char k;
-        fscanf(target, "%c", &k);
-        frequency[k]++;
-    }
-
-    priority_queue <symb*, vector<symb*>, comp> pq(compare);
-    int i = 0;
-    for(i = 0; i < 256; i++)
-    {
-        if (frequency[i])
-        {
-            symb* e;
-            e = (symb*)malloc(sizeof(symb));
-            e->p = frequency[i];
-            e->n = i;
-            e->left = e->right = NULL;
-            pq.push(e);
-        }
-        nm[i].value = i;
-    }
-
-    while(pq.size() != 1)
-    {
-        symb* t1 = pq.top();
-        pq.pop();
-        symb* t2 = pq.top();
-        pq.pop();
-        symb* e = (symb*)malloc(sizeof(symb));
-        e->left = t1;
-        e->right = t2;
-        e->p = t1->p + t2->p;
-        pq.push(e);
-    }
-
-    c_symbs(pq.top(), 0, 0);
-    stable_sort(nm, nm + 256, compare_nm);
+    stable_sort(symbols, symbols + 256, cmp);
 
     int max_length;
     int max_code = 0;
     int curr_code = -1;
 
+    unsigned char code[32];
     i = -1;
 
-    while (nm[++i].l == 0);
-    max_length = nm[i].l;
+    while (symbols[++i].code_length == 0);
+
+    max_length = symbols[i].code_length;
 
     while (i <= 255)
     {
-        if (max_length == nm[i].l)
+        if (max_length == symbols[i].code_length)
         {
             curr_code += 1;
-<<<<<<< HEAD
-            unsigned char buff = 0;
-            for (int t = 0; t < max_length; t++)
+            for (t = 0; t < max_length; t++)
             {
-                unsigned char k = pow(2, t);
-                k &= curr_code;
-                if (k != 0)
-                {
-                    k = pow(2, max_length - t - 1);
-                    buff += k;
-                }
+                  unsigned int k = pow(2, t);
+                  k &= curr_code;
+                  code[max_length - t - 1] = k != 0;
             }
-            nm[i].c = buff;
-=======
-            nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
->>>>>>> 66556d1eb1f3167f804fb7cd593330fa9024d999
         }
         else
         {
             curr_code += 1;
-            curr_code <<= nm[i].l - max_length;
-            max_length = nm[i].l;
-<<<<<<< HEAD
-            unsigned char buff = 0;
-            for (int t = 0; t < max_length; t++)
+            curr_code <<= symbols[i].code_length - max_length;
+            max_length = symbols[i].code_length;
+
+            for (t = 0; t < max_length; t++)
             {
-                unsigned char k = pow(2, t);
-                k &= curr_code;
-                if (k != 0)
-                {
-                    k = pow(2, max_length - t - 1);
-                    buff += k;
-                }
+                  unsigned int k = pow(2, t);
+                  k &= curr_code;
+                  code[max_length - t - 1] = k != 0;
             }
-=======
-            nm[i].c = (invert_int((int)curr_code)) >> (32 - nm[i].l);
->>>>>>> 66556d1eb1f3167f804fb7cd593330fa9024d999
         }
-        i++;
-    }
-    for (int i = 0; i < 256; i++)
+
+    tmp = head;
+    for (int t = 0; t < max_length; t++)
     {
-        s_nm[nm[i].value] = &nm[i];
+        tmp = link(tmp, code[t]);
+        tmp->ilist = 0;
+    }
+    tmp->value = symbols[i].value;
+    tmp->ilist = 1;
+
+    i++;
     }
 
-    fprintf(output, "UPA");
-    fprintf(output, "HUFF");
-    fprintf(output, "%c", 1);
-    //unsigned short int - count
-    fprintf(output, "%c", 1);
-    fprintf(output, "%c", 0);
-    //-------------------------
-    fprintf(output, "%c", filename_length - 1);
-    for (int i = 0; i < filename_length; i++)
-        fprintf(output, "%c", filename[i] + 7);
+    unsigned char buff;
+    unsigned long long byte_count = 0;
 
-    fseek(target, 0, SEEK_SET);
-    int j = 0;
-    for (j = 0; j < filesize; j++)
+    while (byte_count < real_size)
     {
-        unsigned char t;
-        fscanf(target, "%c", &t);
-        new_symb* tmp_nm = s_nm[t];
-        long long k = tmp_nm->c;
-        k <<= buf_length;
-        buffer += k;
-        buf_length += tmp_nm->l;
-        while(buf_length > 8)
+        fscanf(target, "%c", &buff);
+        for (int m = 7; m >= 0; m--){
+            if (curr_node->ilist)
         {
-            unsigned char k = invert_char((unsigned char)buffer);
-            result.push_back(k);
-            buffer >>= 8;
-            buf_length -= 8;
+            fprintf(output, "%c", curr_node->value);
+            curr_node = head;
+            byte_count++;
+            if (byte_count == real_size)
+                break;
+        }
+            unsigned char k = pow(2, m);
+            k &= buff;
+            if (k == 0)
+                curr_node = curr_node->left;
+            else
+                curr_node = curr_node->right;
         }
     }
-
-    if (buf_length > 0)
-    {
-        unsigned char k = invert_char((unsigned char)buffer);
-        result.push_back(k);
-    }
-
-    int length = result.size();
-
-   for (int i = 0 ; i < 8; i++)
-    {
-        unsigned char k = (char)length;
-        length >>= 8;
-        fprintf(output, "%c", k);
-    }
-
-    for (int i = 0 ; i < 8; i++)
-    {
-        unsigned char k = (char)filesize;
-        filesize >>= 8;
-        fprintf(output, "%c", k);
-    }
-
-    for (int i = 0; i < 256; i++)
-        fprintf(output, "%c", (unsigned char)s_nm[i]->l);
-
-    for (int i = 0; i < result.size(); i++)
-        fprintf(output, "%c", result[i]);
-
     return;
 }
