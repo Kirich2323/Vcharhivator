@@ -129,27 +129,19 @@ void decompression_extract(FILE* target, char output_path[])
     while (i <= 255)
     {
         if (max_length == symbols[i].code_length)
-        {
             curr_code += 1;
-            for (t = 0; t < max_length; t++)
-            {
-                  unsigned int k = pow(2, t);
-                  k &= curr_code;
-                  code[max_length - t - 1] = k != 0;
-            }
-        }
         else
         {
             curr_code += 1;
             curr_code <<= symbols[i].code_length - max_length;
             max_length = symbols[i].code_length;
+        }
 
-            for (t = 0; t < max_length; t++)
-            {
-                  unsigned int k = pow(2, t);
-                  k &= curr_code;
-                  code[max_length - t - 1] = k != 0;
-            }
+        for (t = 0; t < max_length; t++)
+        {
+            unsigned int k = pow(2, t);
+            k &= curr_code;
+            code[max_length - t - 1] = k != 0;
         }
 
     tmp = head;
