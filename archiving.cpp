@@ -26,8 +26,8 @@ typedef struct symb{
 bitset <32> str;
 
 typedef struct new_symb{
-    unsigned char c;
-    unsigned char l;
+    unsigned int c;
+    unsigned int l;
     unsigned char value;
 }new_symb;
 
@@ -56,7 +56,7 @@ void c_symbs(symb* e, unsigned char n, int length)
         c_symbs(t->left, 0, length + 1);
     else
     {
-        unsigned char k = (unsigned char)(pow(2, length) - 1) & (unsigned char)str.to_ulong();
+        int k = (int)(pow(2, length) - 1) & (int)str.to_ulong();
         nm[e->n].c = k;
         if (length == 0)
             length = 1;
