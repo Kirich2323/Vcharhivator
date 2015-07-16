@@ -264,7 +264,7 @@ void archive(char* files[], int files_count)
         result.push_back(k);
     }
 
-    int length = result.size();
+    unsigned long long length = result.size();
 
     for (int i = 0; i < 8; i++)
     {
