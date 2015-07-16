@@ -191,6 +191,30 @@ void encode_symbs(void)
     }
 }
 
+void huff_compression(FILE* target, int filesize)
+{
+    fseek(target, 0, SEEK_SET);
+    long long buffer = 0;
+    for (int j = 0; j < filesize; j++)
+    {
+        unsigned char t;
+        fscanf(target, "%c", &t);
+        new_symb* tmp_nm = s_nm[t];
+        long long k = tmp_nm->c;
+        k <<= buf_length;
+        buffer += k;
+        buf_length += tmp_nm->l;
+        while(buf_length > 8)
+        {
+            cache_byte((unsigned char)buffer);
+            buffer >>= 8;
+            buf_length -= 8;
+        }
+    }
+    if (buf_length > 0)
+        cache_byte((unsigned char)buffer);
+}
+
 void set_filename(char* file_path, char* file_name, int file_name_length)
 {
     int i = -1;
@@ -237,29 +261,7 @@ void archive(char* files[], int files_count)
     for (int i = 0; i < filename_length; i++)
         fprintf(output, "%c", filename[i]);
 
-    long long buffer = 0;
-
-    fseek(target, 0, SEEK_SET);
-    int j = 0;
-    for (j = 0; j < filesize; j++)
-    {
-        unsigned char t;
-        fscanf(target, "%c", &t);
-        new_symb* tmp_nm = s_nm[t];
-        long long k = tmp_nm->c;
-        k <<= buf_length;
-        buffer += k;
-        buf_length += tmp_nm->l;
-        while(buf_length > 8)
-        {
-            cache_byte((unsigned char)buffer);
-            buffer >>= 8;
-            buf_length -= 8;
-        }
-    }
-
-    if (buf_length > 0)
-        cache_byte((unsigned char)buffer);
+    huff_compression(target, filesize);
 
     unsigned long long length = result.size();
 
