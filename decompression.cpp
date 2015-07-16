@@ -130,7 +130,7 @@ void decompression_extract(FILE* target, char output_path[])
 
     for (int i = 0 ; i < 4; i++)
     {
-        unsigned int k;
+        unsigned int k = 0;
         fscanf(target, "%c", &k);
         k *= pow(2, 8*i);
         c_length += k;
