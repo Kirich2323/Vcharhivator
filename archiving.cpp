@@ -79,7 +79,7 @@ long getFileSize(FILE *file)
     return lEndPos;
 }
 
-unsigned char invert(unsigned char x)
+unsigned char invert_char(unsigned char x)
 {
     int base = 256;
     unsigned char  res = 0;
@@ -231,7 +231,7 @@ void archive(char* files[], int files_count)
         buf_length += tmp_nm->l;
         while(buf_length > 8)
         {
-            unsigned char k = invert((unsigned char)buffer);
+            unsigned char k = invert_char((unsigned char)buffer);
             result.push_back(k);
             buffer >>= 8;
             buf_length -= 8;
@@ -240,7 +240,7 @@ void archive(char* files[], int files_count)
 
     if (buf_length > 0)
     {
-        unsigned char k = invert((unsigned char)buffer);
+        unsigned char k = invert_char((unsigned char)buffer);
         result.push_back(k);
     }
 
