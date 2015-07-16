@@ -41,6 +41,7 @@ bool compare(symb* x1, symb* x2)
 {
     return (x1->p > x2->p);
 }
+priority_queue <symb*, vector<symb*>, comp> pq(compare);
 
 void c_symbs(symb* e, unsigned char n, int length)
 {
@@ -102,6 +103,23 @@ unsigned int invert_int(unsigned int x)
     return res;
 }
 
+void fill_priority_queue(void)
+{
+    for(int i = 0; i < 256; i++)
+    {
+        if (frequency[i])
+        {
+            symb* e;
+            e = (symb*)malloc(sizeof(symb));
+            e->p = frequency[i];
+            e->n = i;
+            e->left = e->right = NULL;
+            pq.push(e);
+        }
+        nm[i].value = i;
+    }
+}
+
 unsigned char calculate_file_name_length(char* file_path)
 {
     int i = -1;
@@ -143,21 +161,7 @@ void archive(char* files[], int files_count)
         frequency[k]++;
     }
 
-    priority_queue <symb*, vector<symb*>, comp> pq(compare);
-    int i = 0;
-    for(i = 0; i < 256; i++)
-    {
-        if (frequency[i])
-        {
-            symb* e;
-            e = (symb*)malloc(sizeof(symb));
-            e->p = frequency[i];
-            e->n = i;
-            e->left = e->right = NULL;
-            pq.push(e);
-        }
-        nm[i].value = i;
-    }
+    fill_priority_queue();
 
     while(pq.size() != 1)
     {
@@ -179,7 +183,7 @@ void archive(char* files[], int files_count)
     int max_code = 0;
     int curr_code = -1;
 
-    i = -1;
+    int i = -1;
 
     while (nm[++i].l == 0);
     max_length = nm[i].l;
