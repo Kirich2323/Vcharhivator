@@ -13,7 +13,7 @@ typedef struct node{
 unsigned char value;
 node* left;
 node* right;
-bool ilist;
+bool leaf;
 }node;
 
 node* head;
@@ -160,10 +160,10 @@ void decompression_extract(FILE* target, char output_path[])
     for (int t = 0; t < max_length; t++)
     {
         tmp = link(tmp, code[t]);
-        tmp->ilist = 0;
+        tmp->leaf = 0;
     }
     tmp->value = symbols[i].value;
-    tmp->ilist = 1;
+    tmp->leaf = 1;
 
     i++;
     }
@@ -175,7 +175,7 @@ void decompression_extract(FILE* target, char output_path[])
     {
         fscanf(target, "%c", &buff);
         for (int m = 7; m >= 0; m--){
-            if (curr_node->ilist)
+            if (curr_node->leaf)
         {
             fprintf(output, "%c", curr_node->value);
             curr_node = head;
