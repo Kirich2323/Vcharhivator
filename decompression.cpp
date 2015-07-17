@@ -62,7 +62,7 @@ else
 }
 
 
-void decompression_extract(FILE* target, char output_path[])
+void decompression_extract(FILE* target)
 {
     int i, t;
     char UPA[4] = {'U', 'P', 'A', '\0'};
