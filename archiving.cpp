@@ -251,7 +251,6 @@ void archive(char* files[], unsigned short int files_count)
 
         char filename_length = calculate_file_name_length(files[i]);
         char filename[filename_length + 1];
-        //strncat(filename, "\\", 2);
         set_filename(files[i], filename, filename_length);
 
         fprintf(output, "%c", filename_length - 1);
