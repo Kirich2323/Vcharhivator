@@ -307,7 +307,7 @@ void archive(char* files[], unsigned short int files_count)
         fwrite(&length, sizeof(unsigned long long), 1, output);
         fwrite(&filesize, sizeof(unsigned long long), 1, output);
         if (filesize == 0)
-            return;
+            break;
         fseek(output, current_position, SEEK_SET);
 
         for (int i = 0; i < 256; i++)
