@@ -160,8 +160,7 @@ unsigned char calculate_file_name_length(char* file_path)
     int i = -1;
     while (file_path[++i] != '\0');
     int k = i;
-    while (file_path[--k] != '\\');
-
+    while (file_path[--k] != '\\' && (k >= 0));
     return i - k - 1 ;
 }
 
@@ -224,7 +223,7 @@ void set_filename(char* file_path, char* file_name, int file_name_length)
 {
     int i = -1;
     while(file_path[++i] != '\0');
-    for (;file_name_length >= 0; file_name_length--, i--)
+    for (;(file_name_length >= 0) && (i >= 0); file_name_length--, i--)
         file_name[file_name_length] = file_path[i];
 }
 
@@ -251,8 +250,8 @@ void archive(char* files[], unsigned short int files_count)
         FILE* target = fopen(files[i], "rb");
 
         char filename_length = calculate_file_name_length(files[i]);
-        char filename[filename_length];
-        strncat(filename, "\\", 1);
+        char filename[filename_length + 1];
+        //strncat(filename, "\\", 2);
         set_filename(files[i], filename, filename_length);
 
         fprintf(output, "%c", filename_length - 1);
@@ -306,9 +305,14 @@ void archive(char* files[], unsigned short int files_count)
         fseek(output, offsets[i], SEEK_SET);
         fwrite(&length, sizeof(unsigned long long), 1, output);
         fwrite(&filesize, sizeof(unsigned long long), 1, output);
-        if (filesize == 0)
-            break;
+
         fseek(output, current_position, SEEK_SET);
+        if (filesize == 0)
+        {
+            for (int i = 0; i < 256; i++)
+                fprintf(output, "%c", 0);
+            continue;
+        }
 
         for (int i = 0; i < 256; i++)
             fprintf(output, "%c", (unsigned char)s_nm[i]->l);
