@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 #include <cstring>
+#include <vector>
 
 using namespace std;
 
@@ -14,6 +15,8 @@ node* left;
 node* right;
 bool leaf;
 }node;
+
+vector <char*> filenames;
 
 typedef struct encoded_symbol{
 unsigned char value;
@@ -32,6 +35,14 @@ c_node->left = NULL;
 c_node->right = NULL;
 return c_node;
 }
+
+typedef struct FAT
+{
+    unsigned long long real_size;
+    unsigned long long packed_size;
+} fat;
+
+vector <fat> files;
 
 node* link (node* current_node, unsigned char turn){
 node* link_of_node;
@@ -53,13 +64,7 @@ else
 
 void decompression_extract(FILE* target, char output_path[])
 {
-    FILE* output = fopen(output_path, "wb");
     int i, t;
-    e_symbol symbols[256];
-    node* head = node_create();
-    node* tmp;
-    node* curr_node = head;
-
     char UPA[4] = {'U', 'P', 'A', '\0'};
     char sign[4];
     sign[3] = '\0';
@@ -85,99 +90,108 @@ void decompression_extract(FILE* target, char output_path[])
     char solid;
     fread(&solid, sizeof(char), 1, target);
 
-    if (solid)
-        cout << "Solid\n";
-    else
-        cout << "Not solid\n";
-
     unsigned short int files_count;
     fread(&files_count, sizeof(unsigned short int), 1, target);
 
     unsigned char filename_length;
-    fread(&filename_length, sizeof(unsigned char), 1, target);
-
-    char* filename = (char*)malloc(filename_length + 2);
-    filename[filename_length] = '\0';
-
-    fread(filename, sizeof(char), filename_length+1, target);
-
-    unsigned long long packed_size = 0;
-    unsigned long long real_size = 0;
-
-    fread(&packed_size, sizeof(unsigned long long), 1, target);
-    fread(&real_size, sizeof(unsigned long long), 1, target);
-
-    for (i = 0; i <= 255; i++)
+    char* filename;
+    for (int i = 0; i < files_count; i++)
     {
-        symbols[i].value = i;
-        fscanf(target, "%c", &symbols[i].code_length);
+        fread(&filename_length, sizeof(unsigned char), 1, target);
+        filename = (char*)malloc(sizeof(char) * (filename_length + 2));
+        filename[filename_length + 1] = '\0';
+        fread(filename, sizeof(char), filename_length+1, target);
+        filenames.push_back(filename);
+        unsigned long long packed_size;
+        unsigned long long real_size;
+        fread(&packed_size, sizeof(unsigned long long), 1, target);
+        fread(&real_size, sizeof(unsigned long long), 1, target);
+        fat new_fat;
+        new_fat.packed_size = packed_size;
+        new_fat.real_size = real_size;
+        files.push_back(new_fat);
     }
 
-    stable_sort(symbols, symbols + 256, cmp);
-
-    int max_length;
-    int max_code = 0;
-    int curr_code = -1;
-
-    unsigned char code[32];
-    i = -1;
-
-    while (symbols[++i].code_length == 0);
-
-    max_length = symbols[i].code_length;
-
-    while (i <= 255)
+    for (int j = 0; j < files_count; j++)
     {
-        if (max_length == symbols[i].code_length)
-            curr_code += 1;
-        else
+        int i;
+        FILE* output = fopen(filenames[j], "wb");
+        node* head = node_create();
+        node* tmp;
+        node* curr_node = head;
+        e_symbol symbols[256];
+        for (i = 0; i <= 255; i++)
         {
-            curr_code += 1;
-            curr_code <<= symbols[i].code_length - max_length;
-            max_length = symbols[i].code_length;
+            symbols[i].value = i;
+            fscanf(target, "%c", &symbols[i].code_length);
         }
 
-        for (t = 0; t < max_length; t++)
+        stable_sort(symbols, symbols + 256, cmp);
+
+        int max_length;
+        int max_code = 0;
+        int curr_code = -1;
+
+        unsigned char code[32];
+        i = -1;
+        while (symbols[++i].code_length == 0);
+
+        max_length = symbols[i].code_length;
+
+        while (i <= 255)
         {
-            unsigned int k = pow(2, t);
-            k &= curr_code;
-            code[max_length - t - 1] = k != 0;
-        }
-
-    tmp = head;
-    for (int t = 0; t < max_length; t++)
-    {
-        tmp = link(tmp, code[t]);
-        tmp->leaf = 0;
-    }
-    tmp->value = symbols[i].value;
-    tmp->leaf = 1;
-
-    i++;
-    }
-
-    unsigned char buff;
-    unsigned long long byte_count = 0;
-
-    while (byte_count < real_size)
-    {
-        fscanf(target, "%c", &buff);
-        for (int m = 7; m >= 0; m--){
-            if (curr_node->leaf)
-        {
-            fprintf(output, "%c", curr_node->value);
-            curr_node = head;
-            byte_count++;
-            if (byte_count == real_size)
-                break;
-        }
-            unsigned char k = pow(2, m);
-            k &= buff;
-            if (k == 0)
-                curr_node = curr_node->left;
+            if (max_length == symbols[i].code_length)
+                curr_code += 1;
             else
-                curr_node = curr_node->right;
+            {
+                curr_code += 1;
+                curr_code <<= symbols[i].code_length - max_length;
+                max_length = symbols[i].code_length;
+            }
+
+            for (t = 0; t < max_length; t++)
+            {
+                unsigned int k = pow(2, t);
+                k &= curr_code;
+                code[max_length - t - 1] = k != 0;
+            }
+
+            tmp = head;
+            for (int t = 0; t < max_length; t++)
+            {
+                tmp = link(tmp, code[t]);
+                tmp->leaf = 0;
+            }
+            tmp->value = symbols[i].value;
+            tmp->leaf = 1;
+
+            i++;
+        }
+
+        unsigned char buff;
+        unsigned long long byte_count = 0;
+
+        while (byte_count < files[j].real_size)
+        {
+            fscanf(target, "%c", &buff);
+            for (int m = 7; m >= 0; m--){
+                if (curr_node->leaf)
+                {
+                    fprintf(output, "%c", curr_node->value);
+                    curr_node = head;
+                    byte_count++;
+                    if (byte_count == files[j].real_size)
+                        break;
+                }
+                unsigned char k = pow(2, m);
+                k &= buff;
+                if (k == 0)
+                    curr_node = curr_node->left;
+                else
+                    curr_node = curr_node->right;
+            }
         }
     }
+
     return;
 }
