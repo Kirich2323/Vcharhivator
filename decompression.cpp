@@ -174,7 +174,15 @@ void decompression_extract(FILE* target)
         while (byte_count < files[j].real_size)
         {
             fscanf(target, "%c", &buff);
-            unsigned char k = 128;
+            /*int base = 256;
+            unsigned char  res = 0;
+            while (buff != 0)
+            {
+                res += (buff & 1) * (base >>= 1);
+                buff >>= 1;
+            }
+            buff = res;*/
+            unsigned char k = 1;
             for (int m = 7; m >= 0; m--){
                 if (curr_node->leaf)
                 {
@@ -185,7 +193,7 @@ void decompression_extract(FILE* target)
                         break;
                 }
                 unsigned char t = k & buff;
-                k >>= 1;
+                k <<= 1;
                 if (t == 0)
                     curr_node = curr_node->left;
                 else

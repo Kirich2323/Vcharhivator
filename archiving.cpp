@@ -90,7 +90,7 @@ unsigned char invert_char(unsigned char x)
 
 unsigned int invert_int(unsigned int x)
 {
-    long long int base = 4294967296;
+    long long int base = 4294967296; //1ull << 32
     unsigned int  res = 0;
     while (x != 0)
     {
@@ -151,8 +151,8 @@ symb* create_tree(void)
 
 void cache_byte(unsigned char b)
 {
-    unsigned char k = invert_char(b);
-    result.push_back(k);
+    //unsigned char k = invert_char(b);
+    result.push_back(b);
 }
 
 unsigned char calculate_file_name_length(char* file_path)
