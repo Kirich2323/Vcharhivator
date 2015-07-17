@@ -252,6 +252,7 @@ void archive(char* files[], unsigned short int files_count)
 
         char filename_length = calculate_file_name_length(files[i]);
         char filename[filename_length];
+        strncat(filename, "\\", 1);
         set_filename(files[i], filename, filename_length);
 
         fprintf(output, "%c", filename_length - 1);
@@ -282,19 +283,22 @@ void archive(char* files[], unsigned short int files_count)
 
         unsigned long long filesize = getFileSize(target);
 
-        fill_frequency(target, filesize);
+        if (filesize != 0)
+        {
+            fill_frequency(target, filesize);
 
-        fill_priority_queue();
+            fill_priority_queue();
 
-        symb* root = create_tree();
-        c_symbs(root, 0, 0);
-        stable_sort(nm, nm + 256, compare_nm);
+            symb* root = create_tree();
+            c_symbs(root, 0, 0);
+            stable_sort(nm, nm + 256, compare_nm);
 
-        encode_symbs();
+            encode_symbs();
 
-        restore_symbs_order();
+            restore_symbs_order();
 
-        huff_compression(target, filesize);
+            huff_compression(target, filesize);
+        }
 
         unsigned long long length = result.size();
 
@@ -302,6 +306,8 @@ void archive(char* files[], unsigned short int files_count)
         fseek(output, offsets[i], SEEK_SET);
         fwrite(&length, sizeof(unsigned long long), 1, output);
         fwrite(&filesize, sizeof(unsigned long long), 1, output);
+        if (filesize == 0)
+            return;
         fseek(output, current_position, SEEK_SET);
 
         for (int i = 0; i < 256; i++)
